@@ -39,6 +39,7 @@ public static class SceneSetup
         CreateShooter(projectilePrefab, enemiesLayer);
         CreateWaveSpawner(enemyDefinition, spawnPoint);
         PositionCamera();
+        ConfigureLaneMovement();
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
@@ -147,6 +148,33 @@ public static class SceneSetup
         spawnerSO.FindProperty("spawnPoint").objectReferenceValue = spawnPoint;
         spawnerSO.FindProperty("spawnInterval").floatValue = 1.5f;
         spawnerSO.ApplyModifiedProperties();
+    }
+
+    private const float LaneMinX = -3f;
+    private const float LaneMaxX = 3f;
+
+    private static void ConfigureLaneMovement()
+    {
+        GameObject shooterGO = GameObject.Find("Shooter");
+        if (shooterGO != null)
+        {
+            ShooterMovement movement = shooterGO.GetComponent<ShooterMovement>();
+            if (movement == null) movement = shooterGO.AddComponent<ShooterMovement>();
+
+            SerializedObject movementSO = new SerializedObject(movement);
+            movementSO.FindProperty("minX").floatValue = LaneMinX;
+            movementSO.FindProperty("maxX").floatValue = LaneMaxX;
+            movementSO.ApplyModifiedProperties();
+        }
+
+        GameObject spawnerGO = GameObject.Find("WaveSpawner");
+        if (spawnerGO != null && spawnerGO.TryGetComponent(out WaveSpawner spawner))
+        {
+            SerializedObject spawnerSO = new SerializedObject(spawner);
+            spawnerSO.FindProperty("minX").floatValue = LaneMinX;
+            spawnerSO.FindProperty("maxX").floatValue = LaneMaxX;
+            spawnerSO.ApplyModifiedProperties();
+        }
     }
 
     private static void PositionCamera()
