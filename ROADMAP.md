@@ -20,7 +20,7 @@ Research-backed feature list for this vertical auto-shooter, based on genre conv
 
 ## P1 — Core progression (defines the genre)
 
-- [ ] **Meta-currency + permanent upgrades between runs.** Earn coins per run (from kills/score), spend them on persistent upgrades (base damage, fire rate, wall HP) that carry over after Game Over. This is the backbone progression loop in all three reference games.
+- [x] **Meta-currency + permanent upgrades between runs.** Coins earned 1:1 with score, banked via PlayerPrefs on Game Over. Main-menu "UPGRADES" panel spends them on permanent Damage/Fire Rate/Wall HP levels (escalating cost curve), applied automatically at the start of each run. Confirmed working on-device, including persistence across app restarts.
 - [ ] **Stage/wave structure with a win condition + boss wave.** Currently the game is endless-only. Add "survive N waves" structure with a boss enemy every N waves (Mob Control's "Boss Levels" pattern) — gives runs a shape instead of just difficulty ramping forever.
 - [ ] **Multiple unlockable shooter types.** You already asked for the architecture to support this (`ShooterDefinition` exists but is unused). Add 2–3 shooter variants with different stats/visuals, unlockable with meta-currency — mirrors Squad Busters' "squad" identity.
 - [ ] **Chest/reward system on milestones.** Reward chest every N waves or on run-end score thresholds, granting coins/buffs — matches the chest-opening loop core to Rush Royale and Squad Busters' retention design.

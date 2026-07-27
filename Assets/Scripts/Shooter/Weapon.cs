@@ -12,6 +12,11 @@ public class Weapon : MonoBehaviour, IWeapon
     public float Damage { get => damage; set => damage = value; }
     public int ShotCount => 1 + extraShots;
 
+    private void Awake()
+    {
+        damage += UpgradeManager.GetDamageBonus();
+    }
+
     public void AddExtraShots(int amount) => extraShots += amount;
     public void RemoveExtraShots(int amount) => extraShots = Mathf.Max(0, extraShots - amount);
 

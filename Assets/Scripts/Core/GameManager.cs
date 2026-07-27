@@ -31,6 +31,7 @@ public class GameManager : MonoBehaviour
     {
         if (IsGameOver) return;
         IsGameOver = true;
+        CurrencyManager.AddCoins(Score);
         Time.timeScale = 0f;
         AudioManager.Instance?.PlayGameOver();
         GameEnded?.Invoke();

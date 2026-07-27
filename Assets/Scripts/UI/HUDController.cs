@@ -6,6 +6,7 @@ public class HUDController : MonoBehaviour
     [SerializeField] private Text scoreText;
     [SerializeField] private Image wallHealthFill;
     [SerializeField] private GameObject gameOverPanel;
+    [SerializeField] private Text coinsEarnedText;
 
     private void Start()
     {
@@ -50,6 +51,10 @@ public class HUDController : MonoBehaviour
 
     private void HandleGameOver()
     {
+        if (coinsEarnedText != null && GameManager.Instance != null)
+        {
+            coinsEarnedText.text = $"+{GameManager.Instance.Score} Coins";
+        }
         gameOverPanel.SetActive(true);
     }
 }

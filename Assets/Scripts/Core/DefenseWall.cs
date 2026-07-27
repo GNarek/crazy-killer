@@ -26,7 +26,7 @@ public class DefenseWall : MonoBehaviour
         health = GetComponent<Health>();
         health.Died += HandleDestroyed;
         health.DamageTaken += HandleDamageTaken;
-        health.OnSpawn();
+        health.SetMax(health.MaxHealth + UpgradeManager.GetWallHealthBonus());
     }
 
     public void TakeHit(float amount)

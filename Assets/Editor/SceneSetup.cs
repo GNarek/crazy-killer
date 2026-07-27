@@ -513,9 +513,11 @@ public static class SceneSetup
 
         GameObject fireRatePickup = CreatePickupPrefab(FireRatePickupPath, "PickupFireRate", fireRateBuff, new Color(1f, 0.6f, 0.1f));
         GameObject damagePickup = CreatePickupPrefab(DamagePickupPath, "PickupDamage", damageBuff, new Color(0.8f, 0.2f, 0.7f));
-        GameObject multiShotPickup = CreatePickupPrefab(MultiShotPickupPath, "PickupMultiShot", multiShotBuff, new Color(0.1f, 0.85f, 0.85f));
 
-        return new List<GameObject> { fireRatePickup, damagePickup, multiShotPickup };
+        // MultiShot pickup temporarily disabled from spawning; prefab/definition still built, just excluded from the pool below.
+        CreatePickupPrefab(MultiShotPickupPath, "PickupMultiShot", multiShotBuff, new Color(0.1f, 0.85f, 0.85f));
+
+        return new List<GameObject> { fireRatePickup, damagePickup };
     }
 
     private static BuffDefinition CreateBuffDefinition(string path, string id, BuffType type, float value, float duration)
@@ -680,6 +682,15 @@ public static class SceneSetup
         gameOverTextRT.anchoredPosition = Vector2.zero;
         gameOverTextRT.sizeDelta = new Vector2(800f, 150f);
 
+        GameObject coinsEarnedGO = CreateUIText("CoinsEarnedText", panelGO.transform, defaultFont, "+0 Coins", 48, TextAnchor.MiddleCenter);
+        RectTransform coinsEarnedRT = coinsEarnedGO.GetComponent<RectTransform>();
+        coinsEarnedRT.anchorMin = new Vector2(0.5f, 0.5f);
+        coinsEarnedRT.anchorMax = new Vector2(0.5f, 0.5f);
+        coinsEarnedRT.pivot = new Vector2(0.5f, 0.5f);
+        coinsEarnedRT.anchoredPosition = new Vector2(0f, 40f);
+        coinsEarnedRT.sizeDelta = new Vector2(600f, 80f);
+        coinsEarnedGO.GetComponent<Text>().color = new Color(1f, 0.85f, 0.2f);
+
         GameObject buttonGO = new GameObject("RestartButton", typeof(RectTransform), typeof(Image), typeof(Button));
         buttonGO.transform.SetParent(panelGO.transform, false);
         buttonGO.GetComponent<Image>().color = new Color(0.2f, 0.6f, 0.9f, 1f);
@@ -707,6 +718,7 @@ public static class SceneSetup
         hudSO.FindProperty("scoreText").objectReferenceValue = scoreGO.GetComponent<Text>();
         hudSO.FindProperty("wallHealthFill").objectReferenceValue = barFill;
         hudSO.FindProperty("gameOverPanel").objectReferenceValue = panelGO;
+        hudSO.FindProperty("coinsEarnedText").objectReferenceValue = coinsEarnedGO.GetComponent<Text>();
         hudSO.ApplyModifiedProperties();
     }
 
@@ -728,6 +740,25 @@ public static class SceneSetup
             Button gameOverMenuButton = CreateButton("MainMenuButton", panelGO.transform, defaultFont, "MAIN MENU",
                 new Color(0.5f, 0.5f, 0.5f, 1f), new Vector2(0f, -80f), new Vector2(400f, 100f));
             UnityEventTools.AddPersistentListener(gameOverMenuButton.onClick, gameOverNavigator.GoToMainMenu);
+        }
+
+        if (panelGO != null && panelGO.transform.Find("CoinsEarnedText") == null)
+        {
+            GameObject coinsEarnedGO = CreateUIText("CoinsEarnedText", panelGO.transform, defaultFont, "+0 Coins", 48, TextAnchor.MiddleCenter);
+            RectTransform coinsEarnedRT = coinsEarnedGO.GetComponent<RectTransform>();
+            coinsEarnedRT.anchorMin = new Vector2(0.5f, 0.5f);
+            coinsEarnedRT.anchorMax = new Vector2(0.5f, 0.5f);
+            coinsEarnedRT.pivot = new Vector2(0.5f, 0.5f);
+            coinsEarnedRT.anchoredPosition = new Vector2(0f, 40f);
+            coinsEarnedRT.sizeDelta = new Vector2(600f, 80f);
+            coinsEarnedGO.GetComponent<Text>().color = new Color(1f, 0.85f, 0.2f);
+
+            if (canvasGO.TryGetComponent(out HUDController hud))
+            {
+                SerializedObject hudSO = new SerializedObject(hud);
+                hudSO.FindProperty("coinsEarnedText").objectReferenceValue = coinsEarnedGO.GetComponent<Text>();
+                hudSO.ApplyModifiedProperties();
+            }
         }
 
         if (GameObject.Find("PauseButton") != null) return;

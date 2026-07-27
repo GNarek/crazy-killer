@@ -2006,6 +2006,7 @@ MonoBehaviour:
   scoreText: {fileID: 806426185}
   wallHealthFill: {fileID: 711807871}
   gameOverPanel: {fileID: 786573619}
+  coinsEarnedText: {fileID: 0}
 --- !u!114 &1200744023
 MonoBehaviour:
   m_ObjectHideFlags: 0
