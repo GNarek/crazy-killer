@@ -29,15 +29,19 @@ public class ObjectPool
         GameObject obj = inactive.Count > 0 ? inactive.Pop() : CreateNew();
         obj.transform.SetPositionAndRotation(position, rotation);
         obj.SetActive(true);
-        if (obj.TryGetComponent(out IPoolable poolable))
+        foreach (IPoolable poolable in obj.GetComponents<IPoolable>())
+        {
             poolable.OnSpawn();
+        }
         return obj;
     }
 
     public void Release(GameObject obj)
     {
-        if (obj.TryGetComponent(out IPoolable poolable))
+        foreach (IPoolable poolable in obj.GetComponents<IPoolable>())
+        {
             poolable.OnDespawn();
+        }
         obj.SetActive(false);
         inactive.Push(obj);
     }

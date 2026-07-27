@@ -1,9 +1,12 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Health), typeof(LaneMover))]
 public class EnemyController : MonoBehaviour, IPoolable
 {
+    public static event Action AnyDespawned;
+
     [SerializeField] private float goalZ = 0f;
     [SerializeField] private float deathDelay = 0.15f;
 
@@ -60,6 +63,7 @@ public class EnemyController : MonoBehaviour, IPoolable
     private void Despawn()
     {
         PoolManager.Instance.Despawn(gameObject);
+        AnyDespawned?.Invoke();
     }
 
     public void OnSpawn()

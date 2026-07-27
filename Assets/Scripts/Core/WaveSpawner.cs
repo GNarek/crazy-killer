@@ -6,20 +6,32 @@ public class WaveSpawner : MonoBehaviour
     [SerializeField] private List<EnemyDefinition> enemyPool;
     [SerializeField] private Transform spawnPoint;
     [SerializeField] private float spawnInterval = 1.5f;
-    [SerializeField] private float minSpawnInterval = 0.4f;
+    [SerializeField] private float minSpawnInterval = 0.6f;
     [SerializeField] private float difficultyRampSeconds = 90f;
     [SerializeField] private float maxStatMultiplier = 2f;
     [SerializeField] private float minX = -3f;
     [SerializeField] private float maxX = 3f;
+    [SerializeField] private int maxConcurrentEnemies = 10;
 
     private float timer;
     private float elapsed;
+    private int activeCount;
+
+    private void OnEnable()
+    {
+        EnemyController.AnyDespawned += HandleEnemyDespawned;
+    }
+
+    private void OnDisable()
+    {
+        EnemyController.AnyDespawned -= HandleEnemyDespawned;
+    }
 
     private void Update()
     {
         elapsed += Time.deltaTime;
         timer -= Time.deltaTime;
-        if (timer > 0f || enemyPool.Count == 0) return;
+        if (timer > 0f || enemyPool.Count == 0 || activeCount >= maxConcurrentEnemies) return;
 
         SpawnRandom();
         timer = CurrentSpawnInterval();
@@ -50,5 +62,11 @@ public class WaveSpawner : MonoBehaviour
         {
             enemy.Initialize(definition, CurrentStatMultiplier());
         }
+        activeCount++;
+    }
+
+    private void HandleEnemyDespawned()
+    {
+        activeCount = Mathf.Max(0, activeCount - 1);
     }
 }

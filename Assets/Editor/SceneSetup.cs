@@ -51,8 +51,8 @@ public static class SceneSetup
 
         GameObject enemyPrefab = CreateEnemyPrefab(enemiesLayer);
         EnemyDefinition enemyDefinition = CreateEnemyDefinition(enemyPrefab);
-        Transform enemySpawnPoint = CreateSpawnPoint("EnemySpawnPoint", 20f);
-        Transform pickupSpawnPoint = CreateSpawnPoint("PickupSpawnPoint", 14f);
+        Transform enemySpawnPoint = CreateSpawnPoint("EnemySpawnPoint", 26f);
+        Transform pickupSpawnPoint = CreateSpawnPoint("PickupSpawnPoint", 18f);
 
         CreateShooter(projectilePrefab);
         CreateWaveSpawner(enemyDefinition, enemySpawnPoint);
@@ -146,10 +146,12 @@ public static class SceneSetup
 
     private static Transform CreateSpawnPoint(string name, float z)
     {
-        GameObject existing = GameObject.Find(name);
-        if (existing != null) return existing.transform;
+        GameObject spawnPoint = GameObject.Find(name);
+        if (spawnPoint == null)
+        {
+            spawnPoint = new GameObject(name);
+        }
 
-        GameObject spawnPoint = new GameObject(name);
         spawnPoint.transform.position = new Vector3(0f, 0.5f, z);
         return spawnPoint.transform;
     }
@@ -235,12 +237,15 @@ public static class SceneSetup
 
     private static void CreateGround()
     {
-        if (GameObject.Find("Ground") != null) return;
+        GameObject ground = GameObject.Find("Ground");
+        if (ground == null)
+        {
+            ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            ground.name = "Ground";
+        }
 
-        GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
-        ground.name = "Ground";
-        ground.transform.position = new Vector3(0f, 0f, 8.5f);
-        ground.transform.localScale = new Vector3(1f, 1f, 2.7f);
+        ground.transform.position = new Vector3(0f, 0f, 5f);
+        ground.transform.localScale = new Vector3(2.5f, 1f, 12f);
 
         if (ground.TryGetComponent(out Renderer renderer))
         {
@@ -421,7 +426,8 @@ public static class SceneSetup
         if (main == null) return;
 
         main.transform.position = new Vector3(0f, 14f, -12f);
-        main.transform.rotation = Quaternion.Euler(55f, 0f, 0f);
+        main.transform.rotation = Quaternion.Euler(38f, 0f, 0f);
+        main.fieldOfView = 52f;
     }
 
     private static void CreateHUD()

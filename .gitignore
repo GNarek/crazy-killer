@@ -57,5 +57,9 @@ crashlytics-build.properties
 /[Aa]ssets/_Recovery/
 /[Aa]ssets/_Recovery.meta
 
+# Android build byproducts
+.utmp/
+*_BurstDebugInformation_DoNotShip/
+
 # macOS
 .DS_Store

@@ -224,7 +224,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 52
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -250,7 +250,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.46174863, y: 0, z: 0, w: 0.8870109}
+  m_LocalRotation: {x: 0.32556814, y: 0, z: 0, w: 0.94551855}
   m_LocalPosition: {x: 0, y: 14, z: -12}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -557,6 +557,7 @@ MonoBehaviour:
   maxStatMultiplier: 2
   minX: -3
   maxX: 3
+  maxConcurrentEnemies: 10
 --- !u!4 &495047277
 Transform:
   m_ObjectHideFlags: 0
@@ -967,8 +968,8 @@ Transform:
   m_GameObject: {fileID: 802924778}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 8.5}
-  m_LocalScale: {x: 1, y: 1, z: 2.7}
+  m_LocalPosition: {x: 0, y: 0, z: 5}
+  m_LocalScale: {x: 2.5, y: 1, z: 12}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1316,6 +1317,7 @@ GameObject:
   - component: {fileID: 1487440318}
   - component: {fileID: 1487440325}
   - component: {fileID: 1487440326}
+  - component: {fileID: 1487440327}
   m_Layer: 0
   m_Name: Shooter
   m_TagString: Untagged
@@ -1351,6 +1353,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 2761112513088371528, guid: a0ed7b944271f488dad610762bb803fb, type: 3}
   damage: 2
   projectileSpeed: 12
+  spreadAngle: 25
 --- !u!23 &1487440321
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1471,6 +1474,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d05b2bf2f451945b0bddc458bb41227c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuffReceiver
+--- !u!114 &1487440327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1487440317}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac7319c397a9a48e9b2f18d1080a03ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuffPopupSpawner
+  offset: {x: 0, y: 1.5, z: 0}
 --- !u!1 &1569893882
 GameObject:
   m_ObjectHideFlags: 0
@@ -1636,6 +1652,7 @@ MonoBehaviour:
   pickupPrefabs:
   - {fileID: 904934787369608637, guid: 149253093dfe440799cfbc4af9e4f5c8, type: 3}
   - {fileID: 7273646669325090981, guid: 156e04b13c34d44d3bfb4b48b95d138b, type: 3}
+  - {fileID: 4069109672631946569, guid: 677f5db4a0e2e4a2e8abaec17b6d1725, type: 3}
   spawnPoint: {fileID: 1936561692}
   spawnInterval: 6
   minX: -3
@@ -1680,7 +1697,7 @@ Transform:
   m_GameObject: {fileID: 1888972633}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: 20}
+  m_LocalPosition: {x: 0, y: 0.5, z: 26}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1711,7 +1728,7 @@ Transform:
   m_GameObject: {fileID: 1936561691}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: 14}
+  m_LocalPosition: {x: 0, y: 0.5, z: 18}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
