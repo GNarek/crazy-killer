@@ -55,6 +55,7 @@ crashlytics-build.properties
 
 # Unity crash recovery backups
 /[Aa]ssets/_Recovery/
+/[Aa]ssets/_Recovery.meta
 
 # macOS
 .DS_Store
