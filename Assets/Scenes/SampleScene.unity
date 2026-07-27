@@ -705,6 +705,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WaveSpawner
   enemyPool:
   - {fileID: 11400000, guid: 4daf9c6a68d58447cb249496a14e8cd6, type: 2}
+  - {fileID: 11400000, guid: aad4c759b2ed74f819788e345c6aadd8, type: 2}
+  - {fileID: 11400000, guid: 6556975522a44498f8a0ef64e4cacd8d, type: 2}
+  - {fileID: 11400000, guid: 54dcc54a81f174708a3013ccb00e2b03, type: 2}
   spawnPoint: {fileID: 1888972634}
   spawnInterval: 1.5
   minSpawnInterval: 0.4
@@ -1537,7 +1540,7 @@ MonoBehaviour:
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 96
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -2385,7 +2388,7 @@ MonoBehaviour:
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 44
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1

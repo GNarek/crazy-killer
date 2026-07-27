@@ -16,8 +16,15 @@ public static class SceneSetup
     private const string MaterialsFolder = "Assets/Art/Materials";
 
     private const string EnemyPrefabPath = PrefabsFolder + "/Enemy.prefab";
+    private const string RunnerEnemyPrefabPath = PrefabsFolder + "/EnemyRunner.prefab";
+    private const string TankEnemyPrefabPath = PrefabsFolder + "/EnemyTank.prefab";
+    private const string RangedEnemyPrefabPath = PrefabsFolder + "/EnemyRanged.prefab";
     private const string ProjectilePrefabPath = PrefabsFolder + "/Projectile.prefab";
+    private const string EnemyProjectilePrefabPath = PrefabsFolder + "/EnemyProjectile.prefab";
     private const string BasicEnemyDataPath = DataFolder + "/BasicEnemy.asset";
+    private const string RunnerEnemyDataPath = DataFolder + "/RunnerEnemy.asset";
+    private const string TankEnemyDataPath = DataFolder + "/TankEnemy.asset";
+    private const string RangedEnemyDataPath = DataFolder + "/RangedEnemy.asset";
     private const string FireRateBuffPath = BuffsFolder + "/FireRateBuff.asset";
     private const string DamageBuffPath = BuffsFolder + "/DamageBuff.asset";
     private const string MultiShotBuffPath = BuffsFolder + "/MultiShotBuff.asset";
@@ -72,9 +79,16 @@ public static class SceneSetup
 
         ConfigureLaneMovement(pickupSpawnPoint);
         EnsureProjectileCollisionSetup(enemiesLayer);
+        EnsureEnemyProjectilePrefab();
         EnhanceEnemyPrefab();
         ApplyShooterVisuals();
         ApplyWallVisuals();
+
+        List<EnemyDefinition> enemyDefinitions = new List<EnemyDefinition> { enemyDefinition };
+        enemyDefinitions.Add(CreateRunnerEnemy(enemiesLayer));
+        enemyDefinitions.Add(CreateTankEnemy(enemiesLayer));
+        enemyDefinitions.Add(CreateRangedEnemy(enemiesLayer));
+        ConfigureEnemyPool(enemyDefinitions);
 
         List<GameObject> pickupPrefabs = CreatePickupPrefabs();
         CreatePickupSpawner(pickupPrefabs, pickupSpawnPoint);
@@ -154,6 +168,166 @@ public static class SceneSetup
 
         AssetDatabase.CreateAsset(definition, BasicEnemyDataPath);
         return definition;
+    }
+
+    private static EnemyDefinition CreateRunnerEnemy(int enemiesLayer)
+    {
+        GameObject prefab = CreateEnemyVariantPrefab(RunnerEnemyPrefabPath, "EnemyRunner", enemiesLayer,
+            new Vector3(0.7f, 0.75f, 0.7f), new Color(1f, 0.85f, 0.15f), ranged: false);
+        return CreateOrUpdateEnemyDefinition(RunnerEnemyDataPath, "runner_enemy", prefab,
+            maxHealth: 2f, moveSpeed: 3.5f, damage: 1f, scoreValue: 1);
+    }
+
+    private static EnemyDefinition CreateTankEnemy(int enemiesLayer)
+    {
+        GameObject prefab = CreateEnemyVariantPrefab(TankEnemyPrefabPath, "EnemyTank", enemiesLayer,
+            new Vector3(1.4f, 1.3f, 1.4f), new Color(0.35f, 0.15f, 0.25f), ranged: false);
+        return CreateOrUpdateEnemyDefinition(TankEnemyDataPath, "tank_enemy", prefab,
+            maxHealth: 12f, moveSpeed: 1.1f, damage: 3f, scoreValue: 3);
+    }
+
+    private static EnemyDefinition CreateRangedEnemy(int enemiesLayer)
+    {
+        GameObject prefab = CreateEnemyVariantPrefab(RangedEnemyPrefabPath, "EnemyRanged", enemiesLayer,
+            new Vector3(0.9f, 1.15f, 0.9f), new Color(0.25f, 0.35f, 0.55f), ranged: true);
+        return CreateOrUpdateEnemyDefinition(RangedEnemyDataPath, "ranged_enemy", prefab,
+            maxHealth: 3f, moveSpeed: 2f, damage: 1f, scoreValue: 2);
+    }
+
+    private static GameObject CreateEnemyVariantPrefab(string path, string prefabName, int enemiesLayer, Vector3 scale, Color color, bool ranged)
+    {
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(path) == null)
+        {
+            EnsureFolder(PrefabsFolder);
+
+            GameObject enemy = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            enemy.name = prefabName;
+            enemy.layer = enemiesLayer;
+            enemy.transform.localScale = scale;
+
+            enemy.AddComponent<EnemyController>();
+            LaneMover mover = enemy.GetComponent<LaneMover>();
+            mover.direction = new Vector3(0f, 0f, -1f);
+            mover.speed = 2f;
+
+            if (ranged)
+            {
+                enemy.AddComponent<RangedAttacker>();
+            }
+
+            PrefabUtility.SaveAsPrefabAsset(enemy, path);
+            Object.DestroyImmediate(enemy);
+        }
+
+        GameObject contents = PrefabUtility.LoadPrefabContents(path);
+
+        if (contents.TryGetComponent(out EnemyController controller))
+        {
+            SerializedObject controllerSO = new SerializedObject(controller);
+            controllerSO.FindProperty("goalZ").floatValue = -3f;
+            controllerSO.ApplyModifiedProperties();
+        }
+
+        if (contents.GetComponent<HitFlash>() == null) contents.AddComponent<HitFlash>();
+        if (contents.GetComponent<DeathPop>() == null) contents.AddComponent<DeathPop>();
+
+        if (contents.TryGetComponent(out Renderer renderer))
+        {
+            renderer.sharedMaterial = GetOrCreateMaterial(prefabName, color);
+        }
+
+        if (ranged && contents.TryGetComponent(out RangedAttacker attacker))
+        {
+            GameObject enemyProjectile = AssetDatabase.LoadAssetAtPath<GameObject>(EnemyProjectilePrefabPath);
+            SerializedObject attackerSO = new SerializedObject(attacker);
+            attackerSO.FindProperty("projectilePrefab").objectReferenceValue = enemyProjectile;
+            attackerSO.FindProperty("stopZ").floatValue = 4f;
+            attackerSO.FindProperty("fireRate").floatValue = 0.7f;
+            attackerSO.FindProperty("damage").floatValue = 1f;
+            attackerSO.FindProperty("projectileSpeed").floatValue = 10f;
+            attackerSO.ApplyModifiedProperties();
+        }
+
+        PrefabUtility.SaveAsPrefabAsset(contents, path);
+        PrefabUtility.UnloadPrefabContents(contents);
+
+        return AssetDatabase.LoadAssetAtPath<GameObject>(path);
+    }
+
+    private static void EnsureEnemyProjectilePrefab()
+    {
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(EnemyProjectilePrefabPath) == null)
+        {
+            EnsureFolder(PrefabsFolder);
+
+            GameObject projectile = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            projectile.name = "EnemyProjectile";
+            projectile.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+            Object.DestroyImmediate(projectile.GetComponent<Collider>());
+            SphereCollider collider = projectile.AddComponent<SphereCollider>();
+            collider.isTrigger = true;
+            Rigidbody rb = projectile.AddComponent<Rigidbody>();
+            rb.isKinematic = true;
+            rb.useGravity = false;
+            projectile.AddComponent<Projectile>();
+
+            PrefabUtility.SaveAsPrefabAsset(projectile, EnemyProjectilePrefabPath);
+            Object.DestroyImmediate(projectile);
+        }
+
+        GameObject contents = PrefabUtility.LoadPrefabContents(EnemyProjectilePrefabPath);
+
+        if (contents.TryGetComponent(out Projectile projectileComponent))
+        {
+            SerializedObject projectileSO = new SerializedObject(projectileComponent);
+            projectileSO.FindProperty("hittableLayers").intValue = LayerMask.GetMask("Default");
+            projectileSO.ApplyModifiedProperties();
+        }
+
+        if (contents.TryGetComponent(out Renderer renderer))
+        {
+            renderer.sharedMaterial = GetOrCreateMaterial("EnemyProjectile", new Color(0.9f, 0.2f, 0.15f));
+        }
+
+        PrefabUtility.SaveAsPrefabAsset(contents, EnemyProjectilePrefabPath);
+        PrefabUtility.UnloadPrefabContents(contents);
+    }
+
+    private static EnemyDefinition CreateOrUpdateEnemyDefinition(string path, string id, GameObject prefab, float maxHealth, float moveSpeed, float damage, int scoreValue)
+    {
+        EnemyDefinition definition = AssetDatabase.LoadAssetAtPath<EnemyDefinition>(path);
+        if (definition == null)
+        {
+            EnsureFolder(DataFolder);
+            definition = ScriptableObject.CreateInstance<EnemyDefinition>();
+            definition.id = id;
+            AssetDatabase.CreateAsset(definition, path);
+        }
+
+        definition.prefab = prefab;
+        definition.maxHealth = maxHealth;
+        definition.moveSpeed = moveSpeed;
+        definition.damage = damage;
+        definition.scoreValue = scoreValue;
+        EditorUtility.SetDirty(definition);
+
+        return definition;
+    }
+
+    private static void ConfigureEnemyPool(List<EnemyDefinition> definitions)
+    {
+        GameObject waveSpawnerGO = GameObject.Find("WaveSpawner");
+        if (waveSpawnerGO == null || !waveSpawnerGO.TryGetComponent(out WaveSpawner spawner)) return;
+
+        SerializedObject spawnerSO = new SerializedObject(spawner);
+        SerializedProperty poolProp = spawnerSO.FindProperty("enemyPool");
+        poolProp.ClearArray();
+        for (int i = 0; i < definitions.Count; i++)
+        {
+            poolProp.InsertArrayElementAtIndex(i);
+            poolProp.GetArrayElementAtIndex(i).objectReferenceValue = definitions[i];
+        }
+        spawnerSO.ApplyModifiedProperties();
     }
 
     private static Transform CreateSpawnPoint(string name, float z)

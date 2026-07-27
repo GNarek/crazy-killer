@@ -25,12 +25,17 @@ public class DefenseWall : MonoBehaviour
 
         health = GetComponent<Health>();
         health.Died += HandleDestroyed;
+        health.DamageTaken += HandleDamageTaken;
         health.OnSpawn();
     }
 
     public void TakeHit(float amount)
     {
         health.TakeDamage(amount);
+    }
+
+    private void HandleDamageTaken(float amount)
+    {
         AudioManager.Instance?.PlayWallHit();
         CameraShake.Instance?.Shake(0.15f, 0.12f);
     }
