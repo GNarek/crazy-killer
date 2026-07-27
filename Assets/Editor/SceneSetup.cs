@@ -31,6 +31,16 @@ public static class SceneSetup
     [MenuItem("Tools/Crazy Killer/Setup V1 Scene")]
     public static void SetupScene()
     {
+        string activeSceneName = EditorSceneManager.GetActiveScene().name;
+        if (activeSceneName != "SampleScene")
+        {
+            EditorUtility.DisplayDialog("Wrong Scene",
+                $"This must be run with \"SampleScene\" open (it's currently \"{activeSceneName}\"). " +
+                "Open SampleScene first, then run this again.",
+                "OK");
+            return;
+        }
+
         int enemiesLayer = LayerMask.NameToLayer("Enemies");
         if (enemiesLayer == -1)
         {
@@ -70,6 +80,7 @@ public static class SceneSetup
         CreatePickupSpawner(pickupPrefabs, pickupSpawnPoint);
 
         CreateHUD();
+        CreatePauseUI();
         CreateAudioManager();
         CleanUpObsoleteComponents();
 
@@ -525,7 +536,157 @@ public static class SceneSetup
         hudSO.ApplyModifiedProperties();
     }
 
-    private static GameObject CreateUIText(string name, Transform parent, Font font, string text, int fontSize, TextAnchor anchor)
+    private static void CreatePauseUI()
+    {
+        GameObject canvasGO = GameObject.Find("HUD");
+        if (canvasGO == null) return;
+
+        Font defaultFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+
+        GameObject panelGO = GameObject.Find("GameOverPanel");
+        if (panelGO != null && panelGO.transform.Find("MainMenuButton") == null)
+        {
+            if (!panelGO.TryGetComponent(out SceneNavigator gameOverNavigator))
+            {
+                gameOverNavigator = panelGO.AddComponent<SceneNavigator>();
+            }
+
+            Button gameOverMenuButton = CreateButton("MainMenuButton", panelGO.transform, defaultFont, "MAIN MENU",
+                new Color(0.5f, 0.5f, 0.5f, 1f), new Vector2(0f, -80f), new Vector2(400f, 100f));
+            UnityEventTools.AddPersistentListener(gameOverMenuButton.onClick, gameOverNavigator.GoToMainMenu);
+        }
+
+        if (GameObject.Find("PauseButton") != null) return;
+
+        GameObject pauseButtonGO = new GameObject("PauseButton", typeof(RectTransform), typeof(Image), typeof(Button));
+        pauseButtonGO.transform.SetParent(canvasGO.transform, false);
+        pauseButtonGO.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.5f);
+        RectTransform pauseButtonRT = pauseButtonGO.GetComponent<RectTransform>();
+        pauseButtonRT.anchorMin = new Vector2(1f, 1f);
+        pauseButtonRT.anchorMax = new Vector2(1f, 1f);
+        pauseButtonRT.pivot = new Vector2(1f, 1f);
+        pauseButtonRT.anchoredPosition = new Vector2(-30f, -30f);
+        pauseButtonRT.sizeDelta = new Vector2(100f, 100f);
+        GameObject pauseButtonTextGO = CreateUIText("Text", pauseButtonGO.transform, defaultFont, "II", 44, TextAnchor.MiddleCenter);
+        RectTransform pauseButtonTextRT = pauseButtonTextGO.GetComponent<RectTransform>();
+        pauseButtonTextRT.anchorMin = Vector2.zero;
+        pauseButtonTextRT.anchorMax = Vector2.one;
+        pauseButtonTextRT.offsetMin = Vector2.zero;
+        pauseButtonTextRT.offsetMax = Vector2.zero;
+
+        GameObject pausePanelGO = new GameObject("PausePanel", typeof(RectTransform), typeof(Image));
+        pausePanelGO.transform.SetParent(canvasGO.transform, false);
+        pausePanelGO.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.75f);
+        RectTransform pausePanelRT = pausePanelGO.GetComponent<RectTransform>();
+        pausePanelRT.anchorMin = Vector2.zero;
+        pausePanelRT.anchorMax = Vector2.one;
+        pausePanelRT.offsetMin = Vector2.zero;
+        pausePanelRT.offsetMax = Vector2.zero;
+
+        GameObject pausedTextGO = CreateUIText("PausedText", pausePanelGO.transform, defaultFont, "PAUSED", 96, TextAnchor.MiddleCenter);
+        RectTransform pausedTextRT = pausedTextGO.GetComponent<RectTransform>();
+        pausedTextRT.anchorMin = new Vector2(0.5f, 0.7f);
+        pausedTextRT.anchorMax = new Vector2(0.5f, 0.7f);
+        pausedTextRT.pivot = new Vector2(0.5f, 0.5f);
+        pausedTextRT.anchoredPosition = Vector2.zero;
+        pausedTextRT.sizeDelta = new Vector2(800f, 150f);
+
+        PauseController pauseController = pausePanelGO.AddComponent<PauseController>();
+
+        Button resumeButton = CreateButton("ResumeButton", pausePanelGO.transform, defaultFont, "RESUME",
+            new Color(0.2f, 0.6f, 0.9f, 1f), new Vector2(0f, 60f), new Vector2(400f, 110f));
+        UnityEventTools.AddPersistentListener(resumeButton.onClick, pauseController.Resume);
+
+        Button pauseRestartButton = CreateButton("RestartButton", pausePanelGO.transform, defaultFont, "RESTART",
+            new Color(0.2f, 0.6f, 0.9f, 1f), new Vector2(0f, -70f), new Vector2(400f, 110f));
+        RestartController pauseRestartController = pausePanelGO.AddComponent<RestartController>();
+        UnityEventTools.AddPersistentListener(pauseRestartButton.onClick, pauseRestartController.Restart);
+
+        Button pauseMenuButton = CreateButton("MainMenuButton", pausePanelGO.transform, defaultFont, "MAIN MENU",
+            new Color(0.5f, 0.5f, 0.5f, 1f), new Vector2(0f, -200f), new Vector2(400f, 100f));
+        SceneNavigator pauseNavigator = pausePanelGO.AddComponent<SceneNavigator>();
+        UnityEventTools.AddPersistentListener(pauseMenuButton.onClick, pauseNavigator.GoToMainMenu);
+
+        CreateMuteToggle("MuteToggle", pausePanelGO.transform, defaultFont, new Vector2(0f, -320f));
+
+        SerializedObject pauseControllerSO = new SerializedObject(pauseController);
+        pauseControllerSO.FindProperty("pausePanel").objectReferenceValue = pausePanelGO;
+        pauseControllerSO.ApplyModifiedProperties();
+
+        UnityEventTools.AddPersistentListener(pauseButtonGO.GetComponent<Button>().onClick, pauseController.TogglePause);
+
+        pausePanelGO.SetActive(false);
+    }
+
+    internal static Button CreateButton(string name, Transform parent, Font font, string label, Color color, Vector2 anchoredPosition, Vector2 size)
+    {
+        GameObject buttonGO = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
+        buttonGO.transform.SetParent(parent, false);
+        buttonGO.GetComponent<Image>().color = color;
+        RectTransform buttonRT = buttonGO.GetComponent<RectTransform>();
+        buttonRT.anchorMin = new Vector2(0.5f, 0.5f);
+        buttonRT.anchorMax = new Vector2(0.5f, 0.5f);
+        buttonRT.pivot = new Vector2(0.5f, 0.5f);
+        buttonRT.anchoredPosition = anchoredPosition;
+        buttonRT.sizeDelta = size;
+
+        GameObject textGO = CreateUIText("Text", buttonGO.transform, font, label, 40, TextAnchor.MiddleCenter);
+        RectTransform textRT = textGO.GetComponent<RectTransform>();
+        textRT.anchorMin = Vector2.zero;
+        textRT.anchorMax = Vector2.one;
+        textRT.offsetMin = Vector2.zero;
+        textRT.offsetMax = Vector2.zero;
+
+        return buttonGO.GetComponent<Button>();
+    }
+
+    internal static void CreateMuteToggle(string name, Transform parent, Font font, Vector2 anchoredPosition)
+    {
+        GameObject toggleGO = new GameObject(name, typeof(RectTransform), typeof(Toggle));
+        toggleGO.transform.SetParent(parent, false);
+        RectTransform toggleRT = toggleGO.GetComponent<RectTransform>();
+        toggleRT.anchorMin = new Vector2(0.5f, 0.5f);
+        toggleRT.anchorMax = new Vector2(0.5f, 0.5f);
+        toggleRT.pivot = new Vector2(0.5f, 0.5f);
+        toggleRT.anchoredPosition = anchoredPosition;
+        toggleRT.sizeDelta = new Vector2(60f, 60f);
+
+        GameObject backgroundGO = new GameObject("Background", typeof(RectTransform), typeof(Image));
+        backgroundGO.transform.SetParent(toggleGO.transform, false);
+        Image background = backgroundGO.GetComponent<Image>();
+        background.color = new Color(1f, 1f, 1f, 0.3f);
+        RectTransform backgroundRT = backgroundGO.GetComponent<RectTransform>();
+        backgroundRT.anchorMin = Vector2.zero;
+        backgroundRT.anchorMax = Vector2.one;
+        backgroundRT.offsetMin = Vector2.zero;
+        backgroundRT.offsetMax = Vector2.zero;
+
+        GameObject checkGO = new GameObject("Checkmark", typeof(RectTransform), typeof(Image));
+        checkGO.transform.SetParent(backgroundGO.transform, false);
+        Image checkmark = checkGO.GetComponent<Image>();
+        checkmark.color = new Color(0.9f, 0.3f, 0.3f, 1f);
+        RectTransform checkRT = checkGO.GetComponent<RectTransform>();
+        checkRT.anchorMin = new Vector2(0.2f, 0.2f);
+        checkRT.anchorMax = new Vector2(0.8f, 0.8f);
+        checkRT.offsetMin = Vector2.zero;
+        checkRT.offsetMax = Vector2.zero;
+
+        Toggle toggle = toggleGO.GetComponent<Toggle>();
+        toggle.targetGraphic = background;
+        toggle.graphic = checkmark;
+
+        GameObject labelGO = CreateUIText("Label", toggleGO.transform, font, "MUTE", 32, TextAnchor.MiddleLeft);
+        RectTransform labelRT = labelGO.GetComponent<RectTransform>();
+        labelRT.anchorMin = new Vector2(1f, 0f);
+        labelRT.anchorMax = new Vector2(1f, 1f);
+        labelRT.pivot = new Vector2(0f, 0.5f);
+        labelRT.anchoredPosition = new Vector2(20f, 0f);
+        labelRT.sizeDelta = new Vector2(200f, 0f);
+
+        toggleGO.AddComponent<MuteToggle>();
+    }
+
+    internal static GameObject CreateUIText(string name, Transform parent, Font font, string text, int fontSize, TextAnchor anchor)
     {
         GameObject go = new GameObject(name, typeof(RectTransform), typeof(Text));
         go.transform.SetParent(parent, false);
@@ -538,7 +699,7 @@ public static class SceneSetup
         return go;
     }
 
-    private static void EnsureEventSystem()
+    internal static void EnsureEventSystem()
     {
         if (Object.FindFirstObjectByType<EventSystem>() != null) return;
 
