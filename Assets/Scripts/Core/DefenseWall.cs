@@ -31,6 +31,7 @@ public class DefenseWall : MonoBehaviour
     public void TakeHit(float amount)
     {
         health.TakeDamage(amount);
+        AudioManager.Instance?.PlayWallHit();
         CameraShake.Instance?.Shake(0.15f, 0.12f);
     }
 

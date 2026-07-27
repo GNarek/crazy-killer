@@ -18,6 +18,7 @@ public class Weapon : MonoBehaviour, IWeapon
     public void Fire(Transform origin)
     {
         int shotCount = ShotCount;
+        AudioManager.Instance?.PlayShoot();
 
         for (int i = 0; i < shotCount; i++)
         {

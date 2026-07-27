@@ -37,6 +37,7 @@ public class Projectile : MonoBehaviour, IPoolable
         if (other.TryGetComponent(out Health health))
         {
             health.TakeDamage(damage);
+            AudioManager.Instance?.PlayHit();
         }
         Despawn();
     }

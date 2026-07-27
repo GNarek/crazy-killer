@@ -9,6 +9,7 @@ public class PickupItem : MonoBehaviour
         if (other.TryGetComponent(out BuffReceiver receiver))
         {
             receiver.ApplyBuff(buff);
+            AudioManager.Instance?.PlayPickup();
             PoolManager.Instance.Despawn(gameObject);
         }
     }

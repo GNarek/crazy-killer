@@ -70,6 +70,7 @@ public static class SceneSetup
         CreatePickupSpawner(pickupPrefabs, pickupSpawnPoint);
 
         CreateHUD();
+        CreateAudioManager();
         CleanUpObsoleteComponents();
 
         AssetDatabase.SaveAssets();
@@ -544,6 +545,14 @@ public static class SceneSetup
         GameObject eventSystemGO = new GameObject("EventSystem");
         eventSystemGO.AddComponent<EventSystem>();
         eventSystemGO.AddComponent<InputSystemUIInputModule>();
+    }
+
+    private static void CreateAudioManager()
+    {
+        if (GameObject.Find("AudioManager") != null) return;
+
+        GameObject audioManager = new GameObject("AudioManager");
+        audioManager.AddComponent<AudioManager>();
     }
 
     private static void CleanUpObsoleteComponents()

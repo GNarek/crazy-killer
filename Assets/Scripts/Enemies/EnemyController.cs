@@ -49,6 +49,7 @@ public class EnemyController : MonoBehaviour, IPoolable
     private void HandleDeath()
     {
         GameManager.Instance?.AddScore(definition != null ? definition.scoreValue : 1);
+        AudioManager.Instance?.PlayEnemyDeath();
         hitCollider.enabled = false;
         mover.enabled = false;
         StartCoroutine(DelayedDespawn());
