@@ -4,6 +4,8 @@ using UnityEngine;
 public class Health : MonoBehaviour, IPoolable
 {
     public event Action Died;
+    public event Action<float, float> HealthChanged;
+    public event Action<float> DamageTaken;
 
     [SerializeField] private float maxHealth = 10f;
     public float MaxHealth => maxHealth;
@@ -12,32 +14,40 @@ public class Health : MonoBehaviour, IPoolable
     public void SetMax(float value, bool resetCurrent = true)
     {
         maxHealth = value;
-        if (resetCurrent) Current = maxHealth;
+        SetCurrent(resetCurrent ? maxHealth : Current);
     }
 
     public void AddMaxHealth(float amount)
     {
         maxHealth += amount;
-        Current += amount;
+        SetCurrent(Current + amount);
     }
 
     public void RemoveMaxHealth(float amount)
     {
         maxHealth -= amount;
-        Current = Mathf.Min(Current, maxHealth);
+        SetCurrent(Current);
     }
 
     public void TakeDamage(float amount)
     {
         if (Current <= 0f) return;
-        Current -= amount;
+
+        DamageTaken?.Invoke(amount);
+        SetCurrent(Current - amount);
+
         if (Current <= 0f)
         {
-            Current = 0f;
             Died?.Invoke();
         }
     }
 
-    public void OnSpawn() => Current = maxHealth;
+    private void SetCurrent(float value)
+    {
+        Current = Mathf.Clamp(value, 0f, maxHealth);
+        HealthChanged?.Invoke(Current, maxHealth);
+    }
+
+    public void OnSpawn() => SetCurrent(maxHealth);
     public void OnDespawn() { }
 }

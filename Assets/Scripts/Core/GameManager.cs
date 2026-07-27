@@ -1,11 +1,15 @@
+using System;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
+    public event Action<int> ScoreChanged;
+    public event Action GameEnded;
+
     public int Score { get; private set; }
-    public float PlayerHealth { get; private set; } = 100f;
+    public bool IsGameOver { get; private set; }
 
     private void Awake()
     {
@@ -20,20 +24,14 @@ public class GameManager : MonoBehaviour
     public void AddScore(int amount)
     {
         Score += amount;
+        ScoreChanged?.Invoke(Score);
     }
 
-    public void DamagePlayer(float amount)
+    public void GameOver()
     {
-        PlayerHealth -= amount;
-        if (PlayerHealth <= 0f)
-        {
-            PlayerHealth = 0f;
-            GameOver();
-        }
-    }
-
-    private void GameOver()
-    {
-        Debug.Log("Game Over");
+        if (IsGameOver) return;
+        IsGameOver = true;
+        Time.timeScale = 0f;
+        GameEnded?.Invoke();
     }
 }

@@ -15,6 +15,8 @@ GameObject:
   - component: {fileID: 7769167066014126952}
   - component: {fileID: 547224849569778203}
   - component: {fileID: 1471172844409885406}
+  - component: {fileID: 2719116459485158719}
+  - component: {fileID: 8779778950549728997}
   m_Layer: 3
   m_Name: Enemy
   m_TagString: Untagged
@@ -93,7 +95,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 6a85edb2c3ed14ec39f4b14717a73179, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -156,4 +158,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af27f6dd893224490888cac4f72dc9d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  goalZ: 0
+  goalZ: -3
+  deathDelay: 0.15
+--- !u!114 &2719116459485158719
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8661883655412877066}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e53c9d31e38243be91da2ab779552a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HitFlash
+  targetRenderer: {fileID: 0}
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
+  flashDuration: 0.08
+--- !u!114 &8779778950549728997
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8661883655412877066}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b415cd7d8d2e64fccb17d3486ab0044c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DeathPop
+  popScale: 1.3
+  popDuration: 0.15

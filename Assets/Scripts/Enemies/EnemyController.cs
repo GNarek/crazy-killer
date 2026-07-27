@@ -1,26 +1,32 @@
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Health), typeof(LaneMover))]
 public class EnemyController : MonoBehaviour, IPoolable
 {
     [SerializeField] private float goalZ = 0f;
+    [SerializeField] private float deathDelay = 0.15f;
 
     private float damage;
     private EnemyDefinition definition;
     private Health health;
+    private Collider hitCollider;
+    private LaneMover mover;
 
     private void Awake()
     {
         health = GetComponent<Health>();
+        hitCollider = GetComponent<Collider>();
+        mover = GetComponent<LaneMover>();
         health.Died += HandleDeath;
     }
 
-    public void Initialize(EnemyDefinition def)
+    public void Initialize(EnemyDefinition def, float statMultiplier = 1f)
     {
         definition = def;
-        damage = def.damage;
-        health.SetMax(def.maxHealth);
-        GetComponent<LaneMover>().speed = def.moveSpeed;
+        damage = def.damage * statMultiplier;
+        health.SetMax(def.maxHealth * statMultiplier);
+        mover.speed = def.moveSpeed * Mathf.Sqrt(statMultiplier);
     }
 
     private void Update()
@@ -33,13 +39,21 @@ public class EnemyController : MonoBehaviour, IPoolable
 
     private void ReachGoal()
     {
-        GameManager.Instance?.DamagePlayer(damage);
+        DefenseWall.Instance?.TakeHit(damage);
         Despawn();
     }
 
     private void HandleDeath()
     {
         GameManager.Instance?.AddScore(definition != null ? definition.scoreValue : 1);
+        hitCollider.enabled = false;
+        mover.enabled = false;
+        StartCoroutine(DelayedDespawn());
+    }
+
+    private IEnumerator DelayedDespawn()
+    {
+        yield return new WaitForSeconds(deathDelay);
         Despawn();
     }
 
@@ -48,6 +62,11 @@ public class EnemyController : MonoBehaviour, IPoolable
         PoolManager.Instance.Despawn(gameObject);
     }
 
-    public void OnSpawn() { }
+    public void OnSpawn()
+    {
+        hitCollider.enabled = true;
+        mover.enabled = true;
+    }
+
     public void OnDespawn() { }
 }

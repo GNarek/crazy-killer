@@ -2,5 +2,5 @@ using UnityEngine;
 
 public interface IWeapon
 {
-    void Fire(Transform origin, Transform target);
+    void Fire(Transform origin);
 }

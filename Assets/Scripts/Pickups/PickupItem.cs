@@ -9,7 +9,7 @@ public class PickupItem : MonoBehaviour
         if (other.TryGetComponent(out BuffReceiver receiver))
         {
             receiver.ApplyBuff(buff);
-            gameObject.SetActive(false);
+            PoolManager.Instance.Despawn(gameObject);
         }
     }
 }

@@ -3,15 +3,16 @@ using UnityEngine;
 public class Projectile : MonoBehaviour, IPoolable
 {
     [SerializeField] private float lifetime = 3f;
+    [SerializeField] private LayerMask hittableLayers;
 
-    private Transform target;
+    private Vector3 direction;
     private float damage;
     private float speed;
     private float timer;
 
-    public void Launch(Transform newTarget, float dmg, float projectileSpeed)
+    public void Launch(Vector3 travelDirection, float dmg, float projectileSpeed)
     {
-        target = newTarget;
+        direction = travelDirection.normalized;
         damage = dmg;
         speed = projectileSpeed;
         timer = 0f;
@@ -20,27 +21,20 @@ public class Projectile : MonoBehaviour, IPoolable
     private void Update()
     {
         timer += Time.deltaTime;
-        if (timer >= lifetime || target == null)
+        if (timer >= lifetime)
         {
             Despawn();
             return;
         }
 
-        Vector3 toTarget = target.position - transform.position;
-        float step = speed * Time.deltaTime;
-
-        if (toTarget.sqrMagnitude <= step * step)
-        {
-            HitTarget();
-            return;
-        }
-
-        transform.position += toTarget.normalized * step;
+        transform.position += direction * speed * Time.deltaTime;
     }
 
-    private void HitTarget()
+    private void OnTriggerEnter(Collider other)
     {
-        if (target != null && target.TryGetComponent(out Health health))
+        if (((1 << other.gameObject.layer) & hittableLayers.value) == 0) return;
+
+        if (other.TryGetComponent(out Health health))
         {
             health.TakeDamage(damage);
         }
@@ -49,7 +43,6 @@ public class Projectile : MonoBehaviour, IPoolable
 
     private void Despawn()
     {
-        target = null;
         PoolManager.Instance.Despawn(gameObject);
     }
 

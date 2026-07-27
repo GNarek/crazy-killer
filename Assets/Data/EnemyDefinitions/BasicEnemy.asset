@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDefinition
   id: basic_enemy
   prefab: {fileID: 8661883655412877066, guid: 31f5a3242a7524b8281163d9c158bba3, type: 3}
-  maxHealth: 10
+  maxHealth: 4
   moveSpeed: 2
   damage: 1
   scoreValue: 1

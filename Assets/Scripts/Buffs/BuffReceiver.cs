@@ -1,15 +1,19 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class BuffReceiver : MonoBehaviour
 {
+    public event Action<BuffDefinition> BuffApplied;
+
     private readonly List<BuffDefinition> activeBuffs = new List<BuffDefinition>();
 
     public void ApplyBuff(BuffDefinition buff)
     {
         activeBuffs.Add(buff);
         GetEffect(buff).Apply(gameObject);
+        BuffApplied?.Invoke(buff);
 
         if (buff.duration > 0f)
         {
@@ -39,6 +43,7 @@ public class BuffReceiver : MonoBehaviour
             BuffType.FireRate => new FireRateBuffEffect(buff.value),
             BuffType.MoveSpeed => new MoveSpeedBuffEffect(buff.value),
             BuffType.Health => new HealthBuffEffect(buff.value),
+            BuffType.MultiShot => new MultiShotBuffEffect(buff.value),
             _ => new NullBuffEffect()
         };
     }
