@@ -21,7 +21,7 @@ Research-backed feature list for this vertical auto-shooter, based on genre conv
 ## P1 — Core progression (defines the genre)
 
 - [x] **Meta-currency + permanent upgrades between runs.** Coins earned 1:1 with score, banked via PlayerPrefs on Game Over. Main-menu "UPGRADES" panel spends them on permanent Damage/Fire Rate/Wall HP levels (escalating cost curve), applied automatically at the start of each run. Confirmed working on-device, including persistence across app restarts.
-- [ ] **Stage/wave structure with a win condition + boss wave.** Currently the game is endless-only. Add "survive N waves" structure with a boss enemy every N waves (Mob Control's "Boss Levels" pattern) — gives runs a shape instead of just difficulty ramping forever.
+- [x] **Stage/wave structure with a win condition + boss wave.** `WaveSpawner` restructured into 15 discrete timed waves (difficulty scales by wave number, not raw time) with intermission gaps; every 5th wave is a boss wave (single tough enemy, no other spawns). Clearing wave 15 triggers a Victory screen with a coin bonus. Confirmed working on-device.
 - [ ] **Multiple unlockable shooter types.** You already asked for the architecture to support this (`ShooterDefinition` exists but is unused). Add 2–3 shooter variants with different stats/visuals, unlockable with meta-currency — mirrors Squad Busters' "squad" identity.
 - [ ] **Chest/reward system on milestones.** Reward chest every N waves or on run-end score thresholds, granting coins/buffs — matches the chest-opening loop core to Rush Royale and Squad Busters' retention design.
 

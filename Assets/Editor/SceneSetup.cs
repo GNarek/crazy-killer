@@ -19,12 +19,14 @@ public static class SceneSetup
     private const string RunnerEnemyPrefabPath = PrefabsFolder + "/EnemyRunner.prefab";
     private const string TankEnemyPrefabPath = PrefabsFolder + "/EnemyTank.prefab";
     private const string RangedEnemyPrefabPath = PrefabsFolder + "/EnemyRanged.prefab";
+    private const string BossEnemyPrefabPath = PrefabsFolder + "/EnemyBoss.prefab";
     private const string ProjectilePrefabPath = PrefabsFolder + "/Projectile.prefab";
     private const string EnemyProjectilePrefabPath = PrefabsFolder + "/EnemyProjectile.prefab";
     private const string BasicEnemyDataPath = DataFolder + "/BasicEnemy.asset";
     private const string RunnerEnemyDataPath = DataFolder + "/RunnerEnemy.asset";
     private const string TankEnemyDataPath = DataFolder + "/TankEnemy.asset";
     private const string RangedEnemyDataPath = DataFolder + "/RangedEnemy.asset";
+    private const string BossEnemyDataPath = DataFolder + "/BossEnemy.asset";
     private const string FireRateBuffPath = BuffsFolder + "/FireRateBuff.asset";
     private const string DamageBuffPath = BuffsFolder + "/DamageBuff.asset";
     private const string MultiShotBuffPath = BuffsFolder + "/MultiShotBuff.asset";
@@ -89,6 +91,9 @@ public static class SceneSetup
         enemyDefinitions.Add(CreateTankEnemy(enemiesLayer));
         enemyDefinitions.Add(CreateRangedEnemy(enemiesLayer));
         ConfigureEnemyPool(enemyDefinitions);
+
+        EnemyDefinition bossDefinition = CreateBossEnemy(enemiesLayer);
+        ConfigureBossEnemy(bossDefinition);
 
         List<GameObject> pickupPrefabs = CreatePickupPrefabs();
         CreatePickupSpawner(pickupPrefabs, pickupSpawnPoint);
@@ -192,6 +197,14 @@ public static class SceneSetup
             new Vector3(0.9f, 1.15f, 0.9f), new Color(0.25f, 0.35f, 0.55f), ranged: true);
         return CreateOrUpdateEnemyDefinition(RangedEnemyDataPath, "ranged_enemy", prefab,
             maxHealth: 3f, moveSpeed: 2f, damage: 1f, scoreValue: 2);
+    }
+
+    private static EnemyDefinition CreateBossEnemy(int enemiesLayer)
+    {
+        GameObject prefab = CreateEnemyVariantPrefab(BossEnemyPrefabPath, "EnemyBoss", enemiesLayer,
+            new Vector3(2.2f, 2f, 2.2f), new Color(0.15f, 0.05f, 0.08f), ranged: false);
+        return CreateOrUpdateEnemyDefinition(BossEnemyDataPath, "boss_enemy", prefab,
+            maxHealth: 40f, moveSpeed: 0.8f, damage: 8f, scoreValue: 15);
     }
 
     private static GameObject CreateEnemyVariantPrefab(string path, string prefabName, int enemiesLayer, Vector3 scale, Color color, bool ranged)
@@ -327,6 +340,16 @@ public static class SceneSetup
             poolProp.InsertArrayElementAtIndex(i);
             poolProp.GetArrayElementAtIndex(i).objectReferenceValue = definitions[i];
         }
+        spawnerSO.ApplyModifiedProperties();
+    }
+
+    private static void ConfigureBossEnemy(EnemyDefinition bossDefinition)
+    {
+        GameObject waveSpawnerGO = GameObject.Find("WaveSpawner");
+        if (waveSpawnerGO == null || !waveSpawnerGO.TryGetComponent(out WaveSpawner spawner)) return;
+
+        SerializedObject spawnerSO = new SerializedObject(spawner);
+        spawnerSO.FindProperty("bossDefinition").objectReferenceValue = bossDefinition;
         spawnerSO.ApplyModifiedProperties();
     }
 
@@ -757,6 +780,74 @@ public static class SceneSetup
             {
                 SerializedObject hudSO = new SerializedObject(hud);
                 hudSO.FindProperty("coinsEarnedText").objectReferenceValue = coinsEarnedGO.GetComponent<Text>();
+                hudSO.ApplyModifiedProperties();
+            }
+        }
+
+        if (canvasGO.transform.Find("WaveText") == null)
+        {
+            GameObject waveGO = CreateUIText("WaveText", canvasGO.transform, defaultFont, "Wave 1/15", 36, TextAnchor.UpperLeft);
+            RectTransform waveRT = waveGO.GetComponent<RectTransform>();
+            waveRT.anchorMin = new Vector2(0f, 1f);
+            waveRT.anchorMax = new Vector2(0f, 1f);
+            waveRT.pivot = new Vector2(0f, 1f);
+            waveRT.anchoredPosition = new Vector2(40f, -130f);
+            waveRT.sizeDelta = new Vector2(400f, 60f);
+
+            if (canvasGO.TryGetComponent(out HUDController hudForWave))
+            {
+                SerializedObject hudSO = new SerializedObject(hudForWave);
+                hudSO.FindProperty("waveText").objectReferenceValue = waveGO.GetComponent<Text>();
+                hudSO.ApplyModifiedProperties();
+            }
+        }
+
+        if (canvasGO.transform.Find("VictoryPanel") == null)
+        {
+            GameObject victoryPanelGO = new GameObject("VictoryPanel", typeof(RectTransform), typeof(Image));
+            victoryPanelGO.transform.SetParent(canvasGO.transform, false);
+            victoryPanelGO.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.75f);
+            RectTransform victoryPanelRT = victoryPanelGO.GetComponent<RectTransform>();
+            victoryPanelRT.anchorMin = Vector2.zero;
+            victoryPanelRT.anchorMax = Vector2.one;
+            victoryPanelRT.offsetMin = Vector2.zero;
+            victoryPanelRT.offsetMax = Vector2.zero;
+
+            GameObject victoryTextGO = CreateUIText("VictoryText", victoryPanelGO.transform, defaultFont, "VICTORY!", 96, TextAnchor.MiddleCenter);
+            RectTransform victoryTextRT = victoryTextGO.GetComponent<RectTransform>();
+            victoryTextRT.anchorMin = new Vector2(0.5f, 0.6f);
+            victoryTextRT.anchorMax = new Vector2(0.5f, 0.6f);
+            victoryTextRT.pivot = new Vector2(0.5f, 0.5f);
+            victoryTextRT.anchoredPosition = Vector2.zero;
+            victoryTextRT.sizeDelta = new Vector2(800f, 150f);
+            victoryTextGO.GetComponent<Text>().color = new Color(1f, 0.85f, 0.2f);
+
+            GameObject victoryCoinsGO = CreateUIText("VictoryCoinsText", victoryPanelGO.transform, defaultFont, "+0 Coins", 48, TextAnchor.MiddleCenter);
+            RectTransform victoryCoinsRT = victoryCoinsGO.GetComponent<RectTransform>();
+            victoryCoinsRT.anchorMin = new Vector2(0.5f, 0.5f);
+            victoryCoinsRT.anchorMax = new Vector2(0.5f, 0.5f);
+            victoryCoinsRT.pivot = new Vector2(0.5f, 0.5f);
+            victoryCoinsRT.anchoredPosition = new Vector2(0f, 40f);
+            victoryCoinsRT.sizeDelta = new Vector2(600f, 80f);
+            victoryCoinsGO.GetComponent<Text>().color = new Color(1f, 0.85f, 0.2f);
+
+            Button victoryRestartButton = CreateButton("RestartButton", victoryPanelGO.transform, defaultFont, "PLAY AGAIN",
+                new Color(0.2f, 0.6f, 0.9f, 1f), new Vector2(0f, -80f), new Vector2(400f, 120f));
+            RestartController victoryRestartController = victoryPanelGO.AddComponent<RestartController>();
+            UnityEventTools.AddPersistentListener(victoryRestartButton.onClick, victoryRestartController.Restart);
+
+            Button victoryMenuButton = CreateButton("MainMenuButton", victoryPanelGO.transform, defaultFont, "MAIN MENU",
+                new Color(0.5f, 0.5f, 0.5f, 1f), new Vector2(0f, -220f), new Vector2(400f, 100f));
+            SceneNavigator victoryNavigator = victoryPanelGO.AddComponent<SceneNavigator>();
+            UnityEventTools.AddPersistentListener(victoryMenuButton.onClick, victoryNavigator.GoToMainMenu);
+
+            victoryPanelGO.SetActive(false);
+
+            if (canvasGO.TryGetComponent(out HUDController hudForVictory))
+            {
+                SerializedObject hudSO = new SerializedObject(hudForVictory);
+                hudSO.FindProperty("victoryPanel").objectReferenceValue = victoryPanelGO;
+                hudSO.FindProperty("victoryCoinsText").objectReferenceValue = victoryCoinsGO.GetComponent<Text>();
                 hudSO.ApplyModifiedProperties();
             }
         }
