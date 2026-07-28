@@ -15,6 +15,8 @@ GameObject:
   - component: {fileID: 2962717312165306947}
   - component: {fileID: 7890197019394932446}
   - component: {fileID: 5820115057774609134}
+  - component: {fileID: 6023878621487881250}
+  - component: {fileID: 4321537167356881216}
   m_Layer: 0
   m_Name: ShooterUnit
   m_TagString: Untagged
@@ -156,3 +158,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cda4c45d32bf443d96dc8dec4d6fb4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShooterUnit
+--- !u!114 &6023878621487881250
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8698195603670967384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05b2bf2f451945b0bddc458bb41227c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuffReceiver
+--- !u!114 &4321537167356881216
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8698195603670967384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac7319c397a9a48e9b2f18d1080a03ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuffPopupSpawner

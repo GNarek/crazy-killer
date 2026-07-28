@@ -83,7 +83,6 @@ public static class SceneSetup
 
         GameObject shooterUnitPrefab = CreateShooterUnitPrefab(projectilePrefab);
         CreateSquadManager(shooterUnitPrefab);
-        CreateSquadCollector();
         CreateWaveSpawner(enemyDefinition, enemySpawnPoint);
         CreateDefenseWall();
         CreateGround();
@@ -402,6 +401,9 @@ public static class SceneSetup
             renderer.sharedMaterial = GetOrCreateMaterial("ShooterUnit", new Color(0.2f, 0.5f, 1f));
         }
 
+        if (contents.GetComponent<BuffReceiver>() == null) contents.AddComponent<BuffReceiver>();
+        if (contents.GetComponent<BuffPopupSpawner>() == null) contents.AddComponent<BuffPopupSpawner>();
+
         PrefabUtility.SaveAsPrefabAsset(contents, ShooterUnitPrefabPath);
         PrefabUtility.UnloadPrefabContents(contents);
 
@@ -440,27 +442,6 @@ public static class SceneSetup
             dragSO.FindProperty("unitY").floatValue = 0.5f;
             dragSO.ApplyModifiedProperties();
         }
-    }
-
-    private static void CreateSquadCollector()
-    {
-        GameObject collectorGO = GameObject.Find("SquadCollector");
-        if (collectorGO == null) collectorGO = new GameObject("SquadCollector");
-
-        collectorGO.transform.position = new Vector3(0f, 0.5f, -2f);
-
-        BoxCollider collider = collectorGO.GetComponent<BoxCollider>();
-        if (collider == null) collider = collectorGO.AddComponent<BoxCollider>();
-        collider.isTrigger = true;
-        collider.size = new Vector3(LaneMaxX - LaneMinX + 1f, 1.5f, 1.5f);
-
-        Rigidbody rb = collectorGO.GetComponent<Rigidbody>();
-        if (rb == null) rb = collectorGO.AddComponent<Rigidbody>();
-        rb.isKinematic = true;
-        rb.useGravity = false;
-
-        if (collectorGO.GetComponent<BuffReceiver>() == null) collectorGO.AddComponent<BuffReceiver>();
-        if (collectorGO.GetComponent<BuffPopupSpawner>() == null) collectorGO.AddComponent<BuffPopupSpawner>();
     }
 
     private static void CreateWaveSpawner(EnemyDefinition definition, Transform spawnPoint)
@@ -1139,6 +1120,12 @@ public static class SceneSetup
         if (shooterGO != null)
         {
             Object.DestroyImmediate(shooterGO);
+        }
+
+        GameObject squadCollectorGO = GameObject.Find("SquadCollector");
+        if (squadCollectorGO != null)
+        {
+            Object.DestroyImmediate(squadCollectorGO);
         }
 
         GameObject oldWallBar = GameObject.Find("WallHealthBarBg");

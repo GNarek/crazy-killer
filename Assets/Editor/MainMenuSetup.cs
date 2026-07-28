@@ -129,6 +129,23 @@ public static class MainMenuSetup
 
             UnityEventTools.AddPersistentListener(dailyRewardButton.onClick, dailyRewardPanelToggle.Open);
         }
+
+        if (canvasGO.transform.Find("HighScoresButton") == null)
+        {
+            Button highScoresButton = SceneSetup.CreateButton("HighScoresButton", canvasGO.transform, defaultFont, "HIGH SCORES",
+                new Color(0.2f, 0.7f, 0.5f, 1f), new Vector2(0f, -610f), new Vector2(400f, 110f));
+
+            GameObject highScorePanel = CreateHighScorePanel(canvasGO.transform, defaultFont);
+
+            GameObject highScoreToggleGO = new GameObject("HighScorePanelToggle", typeof(RectTransform));
+            highScoreToggleGO.transform.SetParent(canvasGO.transform, false);
+            PanelToggle highScorePanelToggle = highScoreToggleGO.AddComponent<PanelToggle>();
+            SerializedObject highScoreToggleSO = new SerializedObject(highScorePanelToggle);
+            highScoreToggleSO.FindProperty("panel").objectReferenceValue = highScorePanel;
+            highScoreToggleSO.ApplyModifiedProperties();
+
+            UnityEventTools.AddPersistentListener(highScoresButton.onClick, highScorePanelToggle.Open);
+        }
     }
 
     private static GameObject CreateShooterPanel(Transform parent, Font font)
@@ -391,6 +408,63 @@ public static class MainMenuSetup
         slotRT.anchoredPosition = new Vector2(xPos, yPos);
         slotRT.sizeDelta = new Vector2(200f, 140f);
         return slotGO.GetComponent<Text>();
+    }
+
+    private static GameObject CreateHighScorePanel(Transform parent, Font font)
+    {
+        GameObject panelGO = new GameObject("HighScorePanel", typeof(RectTransform), typeof(Image));
+        panelGO.transform.SetParent(parent, false);
+        panelGO.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.85f);
+        RectTransform panelRT = panelGO.GetComponent<RectTransform>();
+        panelRT.anchorMin = Vector2.zero;
+        panelRT.anchorMax = Vector2.one;
+        panelRT.offsetMin = Vector2.zero;
+        panelRT.offsetMax = Vector2.zero;
+
+        GameObject titleGO = SceneSetup.CreateUIText("Title", panelGO.transform, font, "HIGH SCORES", 72, TextAnchor.MiddleCenter);
+        RectTransform titleRT = titleGO.GetComponent<RectTransform>();
+        titleRT.anchorMin = new Vector2(0.5f, 0.5f);
+        titleRT.anchorMax = new Vector2(0.5f, 0.5f);
+        titleRT.pivot = new Vector2(0.5f, 0.5f);
+        titleRT.anchoredPosition = new Vector2(0f, 650f);
+        titleRT.sizeDelta = new Vector2(900f, 150f);
+
+        const int rowCount = 10;
+        Text[] rankTexts = new Text[rowCount];
+        for (int i = 0; i < rowCount; i++)
+        {
+            float yPos = 480f - i * 80f;
+            GameObject rowGO = SceneSetup.CreateUIText($"Rank{i + 1}", panelGO.transform, font, $"{i + 1}. —", 36, TextAnchor.MiddleCenter);
+            RectTransform rowRT = rowGO.GetComponent<RectTransform>();
+            rowRT.anchorMin = new Vector2(0.5f, 0.5f);
+            rowRT.anchorMax = new Vector2(0.5f, 0.5f);
+            rowRT.pivot = new Vector2(0.5f, 0.5f);
+            rowRT.anchoredPosition = new Vector2(0f, yPos);
+            rowRT.sizeDelta = new Vector2(600f, 70f);
+            rankTexts[i] = rowGO.GetComponent<Text>();
+        }
+
+        Button closeButton = SceneSetup.CreateButton("CloseButton", panelGO.transform, font, "CLOSE",
+            new Color(0.5f, 0.5f, 0.5f, 1f), new Vector2(0f, -380f), new Vector2(400f, 110f));
+
+        HighScoreController controller = panelGO.AddComponent<HighScoreController>();
+        SerializedObject controllerSO = new SerializedObject(controller);
+        SerializedProperty rankTextsProp = controllerSO.FindProperty("rankTexts");
+        rankTextsProp.arraySize = rankTexts.Length;
+        for (int i = 0; i < rankTexts.Length; i++)
+        {
+            rankTextsProp.GetArrayElementAtIndex(i).objectReferenceValue = rankTexts[i];
+        }
+        controllerSO.ApplyModifiedProperties();
+
+        PanelToggle closeToggle = panelGO.AddComponent<PanelToggle>();
+        SerializedObject closeToggleSO = new SerializedObject(closeToggle);
+        closeToggleSO.FindProperty("panel").objectReferenceValue = panelGO;
+        closeToggleSO.ApplyModifiedProperties();
+        UnityEventTools.AddPersistentListener(closeButton.onClick, closeToggle.Close);
+
+        panelGO.SetActive(false);
+        return panelGO;
     }
 
     private static void AddScenesToBuildSettings()

@@ -51,6 +51,7 @@ public class GameManager : MonoBehaviour
         if (IsGameOver) return;
         IsGameOver = true;
         CurrencyManager.AddCoins(Score);
+        HighScoreManager.SubmitScore(Score);
         Time.timeScale = 0f;
         AudioManager.Instance?.PlayGameOver();
         GameEnded?.Invoke();
@@ -62,6 +63,7 @@ public class GameManager : MonoBehaviour
         IsGameOver = true;
         int coinsAwarded = Score + VictoryCoinBonus;
         CurrencyManager.AddCoins(coinsAwarded);
+        HighScoreManager.SubmitScore(Score);
         Time.timeScale = 0f;
         AudioManager.Instance?.PlayVictory();
         GameWon?.Invoke(coinsAwarded);
