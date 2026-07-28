@@ -9,9 +9,11 @@ public class PickupItem : MonoBehaviour
         if (other.TryGetComponent(out BuffReceiver receiver))
         {
             receiver.ApplyBuff(buff);
-            AudioManager.Instance?.PlayPickup();
-            ParticleFX.PickupSparkle(transform.position);
+            Vector3 position = transform.position;
             PoolManager.Instance.Despawn(gameObject);
+
+            AudioManager.Instance?.PlayPickup();
+            ParticleFX.PickupSparkle(position);
         }
     }
 }

@@ -29,8 +29,6 @@ public class Weapon : MonoBehaviour, IWeapon
     public void Fire(Transform origin)
     {
         int shotCount = ShotCount;
-        AudioManager.Instance?.PlayShoot();
-        ParticleFX.MuzzleFlash(origin.position);
 
         for (int i = 0; i < shotCount; i++)
         {
@@ -43,5 +41,8 @@ public class Weapon : MonoBehaviour, IWeapon
                 projectile.Launch(rotation * Vector3.forward, damage, projectileSpeed, pierceCount);
             }
         }
+
+        AudioManager.Instance?.PlayShoot();
+        ParticleFX.MuzzleFlash(origin.position);
     }
 }

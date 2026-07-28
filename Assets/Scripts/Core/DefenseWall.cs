@@ -63,6 +63,7 @@ public class DefenseWall : MonoBehaviour
     {
         AudioManager.Instance?.PlayWallHit();
         CameraShake.Instance?.Shake(0.15f, 0.12f);
+        Haptics.Pulse();
     }
 
     private void HandleDestroyed()

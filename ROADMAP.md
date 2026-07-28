@@ -29,8 +29,8 @@ Research-backed feature list for this vertical auto-shooter, based on genre conv
 
 - [x] **More buff types.** Added piercing bullets (permanent, bullets pass through and hit multiple enemies), wall heal (instant repair), and a temporary (8s) wall shield/invulnerability that also blocks ranged-enemy damage, not just melee. Skipped "shooter move speed" — doesn't map to the drag-to-position control scheme (no speed/acceleration concept to buff). Confirmed working on-device.
 - [x] **Particle VFX.** Muzzle flash on fire, burst on enemy death, sparkle on pickup collection — built procedurally via `ParticleFX.cs` (Unity's `ParticleSystem` API, no texture assets needed). Confirmed working on-device.
-- [ ] **Haptic feedback.** Android vibration pulse on wall hits and enemy kills — cheap, high-impact mobile-specific juice.
-- [ ] **Merge mechanic for shooters.** Collecting a duplicate shooter-type pickup merges into a stronger version instead of being wasted (Rush Royale's signature mechanic) — bigger design decision, revisit after P0/P1 are solid.
+- [x] **Haptic feedback.** Vibration pulse on wall hits and enemy kills via `Handheld.Vibrate()`. Confirmed working on-device. (Also fixed a real bug found in this pass: `ParticleFX`'s `Shader.Find` returned null on-device since the shader was only referenced from code, never a real asset — silently stripped from the build — which threw mid-`Weapon.Fire()` and blocked shooting entirely. Switched to the already-asset-referenced URP/Lit shader and reordered all VFX calls to happen after critical gameplay logic everywhere.)
+- [ ] **Merge mechanic for shooters.** Full squad merge system in progress — see `~/.claude/plans/bright-forging-cook.md`.
 
 ## P3 — Live-ops / long-tail (later)
 

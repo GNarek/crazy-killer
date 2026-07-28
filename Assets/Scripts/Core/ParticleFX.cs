@@ -54,9 +54,9 @@ public static class ParticleFX
     {
         if (cachedMaterial != null) return cachedMaterial;
 
-        Shader shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
-        if (shader == null) shader = Shader.Find("Universal Render Pipeline/Unlit");
+        Shader shader = Shader.Find("Universal Render Pipeline/Lit");
         cachedMaterial = new Material(shader);
+        cachedMaterial.SetFloat("_Smoothness", 0.05f);
         return cachedMaterial;
     }
 }

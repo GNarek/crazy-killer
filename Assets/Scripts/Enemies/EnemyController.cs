@@ -49,11 +49,13 @@ public class EnemyController : MonoBehaviour, IPoolable
     private void HandleDeath()
     {
         GameManager.Instance?.AddScore(definition != null ? definition.scoreValue : 1);
-        AudioManager.Instance?.PlayEnemyDeath();
-        ParticleFX.EnemyDeathBurst(transform.position);
         hitCollider.enabled = false;
         mover.enabled = false;
         StartCoroutine(DelayedDespawn());
+
+        AudioManager.Instance?.PlayEnemyDeath();
+        ParticleFX.EnemyDeathBurst(transform.position);
+        Haptics.Pulse();
     }
 
     private IEnumerator DelayedDespawn()
