@@ -30,9 +30,15 @@ public static class SceneSetup
     private const string FireRateBuffPath = BuffsFolder + "/FireRateBuff.asset";
     private const string DamageBuffPath = BuffsFolder + "/DamageBuff.asset";
     private const string MultiShotBuffPath = BuffsFolder + "/MultiShotBuff.asset";
+    private const string WallHealBuffPath = BuffsFolder + "/WallHealBuff.asset";
+    private const string PiercingBuffPath = BuffsFolder + "/PiercingBuff.asset";
+    private const string ShieldBuffPath = BuffsFolder + "/ShieldBuff.asset";
     private const string FireRatePickupPath = PrefabsFolder + "/PickupFireRate.prefab";
     private const string DamagePickupPath = PrefabsFolder + "/PickupDamage.prefab";
     private const string MultiShotPickupPath = PrefabsFolder + "/PickupMultiShot.prefab";
+    private const string WallHealPickupPath = PrefabsFolder + "/PickupWallHeal.prefab";
+    private const string PiercingPickupPath = PrefabsFolder + "/PickupPiercing.prefab";
+    private const string ShieldPickupPath = PrefabsFolder + "/PickupShield.prefab";
 
     private const float LaneMinX = -3f;
     private const float LaneMaxX = 3f;
@@ -543,13 +549,20 @@ public static class SceneSetup
         BuffDefinition damageBuff = CreateBuffDefinition(DamageBuffPath, "damage_buff", BuffType.Damage, 2.5f, 0f);
         BuffDefinition multiShotBuff = CreateBuffDefinition(MultiShotBuffPath, "multi_shot_buff", BuffType.MultiShot, 1f, 0f);
 
+        BuffDefinition wallHealBuff = CreateBuffDefinition(WallHealBuffPath, "wall_heal_buff", BuffType.WallHeal, 8f, 0f);
+        BuffDefinition piercingBuff = CreateBuffDefinition(PiercingBuffPath, "piercing_buff", BuffType.Piercing, 1f, 0f);
+        BuffDefinition shieldBuff = CreateBuffDefinition(ShieldBuffPath, "shield_buff", BuffType.Shield, 0f, 8f);
+
         GameObject fireRatePickup = CreatePickupPrefab(FireRatePickupPath, "PickupFireRate", fireRateBuff, new Color(1f, 0.6f, 0.1f));
         GameObject damagePickup = CreatePickupPrefab(DamagePickupPath, "PickupDamage", damageBuff, new Color(0.8f, 0.2f, 0.7f));
+        GameObject wallHealPickup = CreatePickupPrefab(WallHealPickupPath, "PickupWallHeal", wallHealBuff, new Color(0.2f, 0.9f, 0.3f));
+        GameObject piercingPickup = CreatePickupPrefab(PiercingPickupPath, "PickupPiercing", piercingBuff, new Color(0.85f, 0.85f, 0.95f));
+        GameObject shieldPickup = CreatePickupPrefab(ShieldPickupPath, "PickupShield", shieldBuff, new Color(0.3f, 0.6f, 1f));
 
         // MultiShot pickup temporarily disabled from spawning; prefab/definition still built, just excluded from the pool below.
         CreatePickupPrefab(MultiShotPickupPath, "PickupMultiShot", multiShotBuff, new Color(0.1f, 0.85f, 0.85f));
 
-        return new List<GameObject> { fireRatePickup, damagePickup };
+        return new List<GameObject> { fireRatePickup, damagePickup, wallHealPickup, piercingPickup, shieldPickup };
     }
 
     private static BuffDefinition CreateBuffDefinition(string path, string id, BuffType type, float value, float duration)

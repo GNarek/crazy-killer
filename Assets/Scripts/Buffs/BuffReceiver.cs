@@ -42,8 +42,10 @@ public class BuffReceiver : MonoBehaviour
             BuffType.Damage => new DamageBuffEffect(buff.value),
             BuffType.FireRate => new FireRateBuffEffect(buff.value),
             BuffType.MoveSpeed => new MoveSpeedBuffEffect(buff.value),
-            BuffType.Health => new HealthBuffEffect(buff.value),
+            BuffType.WallHeal => new WallHealBuffEffect(buff.value),
             BuffType.MultiShot => new MultiShotBuffEffect(buff.value),
+            BuffType.Piercing => new PiercingBuffEffect(buff.value),
+            BuffType.Shield => new ShieldBuffEffect(),
             _ => new NullBuffEffect()
         };
     }

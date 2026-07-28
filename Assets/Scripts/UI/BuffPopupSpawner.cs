@@ -28,8 +28,10 @@ public class BuffPopupSpawner : MonoBehaviour
             BuffType.Damage => "+DAMAGE",
             BuffType.FireRate => "+FIRE RATE",
             BuffType.MoveSpeed => "+SPEED",
-            BuffType.Health => "+HEALTH",
+            BuffType.WallHeal => "+WALL REPAIR",
             BuffType.MultiShot => "+MULTI SHOT",
+            BuffType.Piercing => "+PIERCING",
+            BuffType.Shield => "+SHIELD",
             _ => "+BUFF"
         };
     }
@@ -41,8 +43,10 @@ public class BuffPopupSpawner : MonoBehaviour
             BuffType.Damage => new Color(0.8f, 0.2f, 0.7f),
             BuffType.FireRate => new Color(1f, 0.6f, 0.1f),
             BuffType.MoveSpeed => new Color(0.2f, 0.8f, 1f),
-            BuffType.Health => new Color(0.2f, 1f, 0.3f),
+            BuffType.WallHeal => new Color(0.2f, 0.9f, 0.3f),
             BuffType.MultiShot => new Color(0.1f, 0.85f, 0.85f),
+            BuffType.Piercing => new Color(0.85f, 0.85f, 0.95f),
+            BuffType.Shield => new Color(0.3f, 0.6f, 1f),
             _ => Color.white
         };
     }

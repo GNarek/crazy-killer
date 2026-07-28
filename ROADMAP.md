@@ -27,7 +27,7 @@ Research-backed feature list for this vertical auto-shooter, based on genre conv
 
 ## P2 — Depth & juice
 
-- [ ] **More buff types.** Piercing bullets (hit multiple enemies in a line), wall heal, temporary shield/invulnerability, shooter move speed. Slots into the existing `BuffDefinition`/`IBuffEffect` system with no architecture changes.
+- [x] **More buff types.** Added piercing bullets (permanent, bullets pass through and hit multiple enemies), wall heal (instant repair), and a temporary (8s) wall shield/invulnerability that also blocks ranged-enemy damage, not just melee. Skipped "shooter move speed" — doesn't map to the drag-to-position control scheme (no speed/acceleration concept to buff). Confirmed working on-device.
 - [ ] **Particle VFX.** Muzzle flash on fire, burst on enemy death, sparkle on pickup collection — currently only have scale-pop + hit-flash, no real particles.
 - [ ] **Haptic feedback.** Android vibration pulse on wall hits and enemy kills — cheap, high-impact mobile-specific juice.
 - [ ] **Merge mechanic for shooters.** Collecting a duplicate shooter-type pickup merges into a stronger version instead of being wasted (Rush Royale's signature mechanic) — bigger design decision, revisit after P0/P1 are solid.

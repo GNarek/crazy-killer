@@ -29,6 +29,11 @@ public class Health : MonoBehaviour, IPoolable
         SetCurrent(Current);
     }
 
+    public void Heal(float amount)
+    {
+        SetCurrent(Current + amount);
+    }
+
     public void TakeDamage(float amount)
     {
         if (Current <= 0f) return;

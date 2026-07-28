@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public enum BuffType { Damage, FireRate, MoveSpeed, Health, MultiShot }
+public enum BuffType { Damage, FireRate, MoveSpeed, WallHeal, MultiShot, Piercing, Shield }
 
 [CreateAssetMenu(fileName = "BuffDefinition", menuName = "CrazyKiller/Buff Definition")]
 public class BuffDefinition : ScriptableObject

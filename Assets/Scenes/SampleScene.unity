@@ -3829,6 +3829,9 @@ MonoBehaviour:
   pickupPrefabs:
   - {fileID: 904934787369608637, guid: 149253093dfe440799cfbc4af9e4f5c8, type: 3}
   - {fileID: 7273646669325090981, guid: 156e04b13c34d44d3bfb4b48b95d138b, type: 3}
+  - {fileID: 7384816105590643366, guid: eaea430daa20041d29930c7604f0d7b3, type: 3}
+  - {fileID: 6716324646264864169, guid: 02170abcfcecb41c2a5a0626ffce8459, type: 3}
+  - {fileID: 5231658546756200190, guid: f762ef1c8d11247cba3db6fd153cbe9f, type: 3}
   spawnPoint: {fileID: 1936561692}
   spawnInterval: 6
   minX: -3

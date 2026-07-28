@@ -9,13 +9,15 @@ public class Projectile : MonoBehaviour, IPoolable
     private float damage;
     private float speed;
     private float timer;
+    private int remainingPierces;
 
-    public void Launch(Vector3 travelDirection, float dmg, float projectileSpeed)
+    public void Launch(Vector3 travelDirection, float dmg, float projectileSpeed, int pierceCount = 0)
     {
         direction = travelDirection.normalized;
         damage = dmg;
         speed = projectileSpeed;
         timer = 0f;
+        remainingPierces = pierceCount;
     }
 
     private void Update()
@@ -34,11 +36,22 @@ public class Projectile : MonoBehaviour, IPoolable
     {
         if (((1 << other.gameObject.layer) & hittableLayers.value) == 0) return;
 
-        if (other.TryGetComponent(out Health health))
+        if (other.TryGetComponent(out DefenseWall wall))
+        {
+            wall.TakeHit(damage);
+        }
+        else if (other.TryGetComponent(out Health health))
         {
             health.TakeDamage(damage);
             AudioManager.Instance?.PlayHit();
         }
+
+        if (remainingPierces > 0)
+        {
+            remainingPierces--;
+            return;
+        }
+
         Despawn();
     }
 
