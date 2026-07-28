@@ -10,6 +10,7 @@ public class PickupItem : MonoBehaviour
         {
             receiver.ApplyBuff(buff);
             AudioManager.Instance?.PlayPickup();
+            ParticleFX.PickupSparkle(transform.position);
             PoolManager.Instance.Despawn(gameObject);
         }
     }

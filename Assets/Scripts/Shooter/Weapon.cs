@@ -30,6 +30,7 @@ public class Weapon : MonoBehaviour, IWeapon
     {
         int shotCount = ShotCount;
         AudioManager.Instance?.PlayShoot();
+        ParticleFX.MuzzleFlash(origin.position);
 
         for (int i = 0; i < shotCount; i++)
         {
