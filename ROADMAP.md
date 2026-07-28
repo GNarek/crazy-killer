@@ -34,7 +34,7 @@ Research-backed feature list for this vertical auto-shooter, based on genre conv
 
 ## P3 — Live-ops / long-tail (later)
 
-- [ ] **Daily rewards.**
+- [x] **Daily rewards.** `DailyRewardManager` tracks a 7-day claim streak via PlayerPrefs (coins: 20/30/40/60/80/100/200, resets to Day 1 if a day is missed). New "DAILY REWARD" panel on the main menu shows all 7 days with the claimable one highlighted, claim button disables once claimed for the day. Confirmed working on-device.
 - [ ] **Leaderboards.**
 - [ ] **Achievements.**
 - [ ] **Monetization hooks** (ads/IAP) — only if/when you decide to publish commercially.

@@ -112,6 +112,23 @@ public static class MainMenuSetup
 
             UnityEventTools.AddPersistentListener(shootersButton.onClick, shooterPanelToggle.Open);
         }
+
+        if (canvasGO.transform.Find("DailyRewardButton") == null)
+        {
+            Button dailyRewardButton = SceneSetup.CreateButton("DailyRewardButton", canvasGO.transform, defaultFont, "DAILY REWARD",
+                new Color(0.9f, 0.7f, 0.1f, 1f), new Vector2(0f, -480f), new Vector2(400f, 110f));
+
+            GameObject dailyRewardPanel = CreateDailyRewardPanel(canvasGO.transform, defaultFont);
+
+            GameObject dailyRewardToggleGO = new GameObject("DailyRewardPanelToggle", typeof(RectTransform));
+            dailyRewardToggleGO.transform.SetParent(canvasGO.transform, false);
+            PanelToggle dailyRewardPanelToggle = dailyRewardToggleGO.AddComponent<PanelToggle>();
+            SerializedObject dailyRewardToggleSO = new SerializedObject(dailyRewardPanelToggle);
+            dailyRewardToggleSO.FindProperty("panel").objectReferenceValue = dailyRewardPanel;
+            dailyRewardToggleSO.ApplyModifiedProperties();
+
+            UnityEventTools.AddPersistentListener(dailyRewardButton.onClick, dailyRewardPanelToggle.Open);
+        }
     }
 
     private static GameObject CreateShooterPanel(Transform parent, Font font)
@@ -290,6 +307,90 @@ public static class MainMenuSetup
             new Color(0.2f, 0.6f, 0.9f, 1f), new Vector2(230f, yPos), new Vector2(280f, 100f));
         buyButton = button;
         costText = button.GetComponentInChildren<Text>();
+    }
+
+    private static GameObject CreateDailyRewardPanel(Transform parent, Font font)
+    {
+        GameObject panelGO = new GameObject("DailyRewardPanel", typeof(RectTransform), typeof(Image));
+        panelGO.transform.SetParent(parent, false);
+        panelGO.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.85f);
+        RectTransform panelRT = panelGO.GetComponent<RectTransform>();
+        panelRT.anchorMin = Vector2.zero;
+        panelRT.anchorMax = Vector2.one;
+        panelRT.offsetMin = Vector2.zero;
+        panelRT.offsetMax = Vector2.zero;
+
+        GameObject titleGO = SceneSetup.CreateUIText("Title", panelGO.transform, font, "DAILY REWARDS", 72, TextAnchor.MiddleCenter);
+        RectTransform titleRT = titleGO.GetComponent<RectTransform>();
+        titleRT.anchorMin = new Vector2(0.5f, 0.5f);
+        titleRT.anchorMax = new Vector2(0.5f, 0.5f);
+        titleRT.pivot = new Vector2(0.5f, 0.5f);
+        titleRT.anchoredPosition = new Vector2(0f, 650f);
+        titleRT.sizeDelta = new Vector2(900f, 150f);
+
+        Text[] dayTexts = new Text[DailyRewardManager.DayCount];
+        float[] row1X = { -330f, -110f, 110f, 330f };
+        float[] row2X = { -220f, 0f, 220f };
+
+        for (int i = 0; i < row1X.Length; i++)
+        {
+            dayTexts[i] = CreateDailySlot(panelGO.transform, font, i + 1, row1X[i], 400f);
+        }
+        for (int i = 0; i < row2X.Length; i++)
+        {
+            dayTexts[row1X.Length + i] = CreateDailySlot(panelGO.transform, font, row1X.Length + i + 1, row2X[i], 180f);
+        }
+
+        GameObject statusGO = SceneSetup.CreateUIText("StatusText", panelGO.transform, font, "", 34, TextAnchor.MiddleCenter);
+        RectTransform statusRT = statusGO.GetComponent<RectTransform>();
+        statusRT.anchorMin = new Vector2(0.5f, 0.5f);
+        statusRT.anchorMax = new Vector2(0.5f, 0.5f);
+        statusRT.pivot = new Vector2(0.5f, 0.5f);
+        statusRT.anchoredPosition = new Vector2(0f, -20f);
+        statusRT.sizeDelta = new Vector2(900f, 100f);
+        statusGO.GetComponent<Text>().color = new Color(1f, 0.85f, 0.2f);
+
+        Button claimButton = SceneSetup.CreateButton("ClaimButton", panelGO.transform, font, "CLAIM",
+            new Color(0.9f, 0.7f, 0.1f, 1f), new Vector2(0f, -180f), new Vector2(500f, 130f));
+
+        Button closeButton = SceneSetup.CreateButton("CloseButton", panelGO.transform, font, "CLOSE",
+            new Color(0.5f, 0.5f, 0.5f, 1f), new Vector2(0f, -340f), new Vector2(400f, 110f));
+
+        DailyRewardController controller = panelGO.AddComponent<DailyRewardController>();
+        SerializedObject controllerSO = new SerializedObject(controller);
+        SerializedProperty dayTextsProp = controllerSO.FindProperty("dayTexts");
+        dayTextsProp.arraySize = dayTexts.Length;
+        for (int i = 0; i < dayTexts.Length; i++)
+        {
+            dayTextsProp.GetArrayElementAtIndex(i).objectReferenceValue = dayTexts[i];
+        }
+        controllerSO.FindProperty("claimButton").objectReferenceValue = claimButton;
+        controllerSO.FindProperty("claimButtonLabel").objectReferenceValue = claimButton.GetComponentInChildren<Text>();
+        controllerSO.FindProperty("statusText").objectReferenceValue = statusGO.GetComponent<Text>();
+        controllerSO.ApplyModifiedProperties();
+
+        UnityEventTools.AddPersistentListener(claimButton.onClick, controller.Claim);
+
+        PanelToggle closeToggle = panelGO.AddComponent<PanelToggle>();
+        SerializedObject closeToggleSO = new SerializedObject(closeToggle);
+        closeToggleSO.FindProperty("panel").objectReferenceValue = panelGO;
+        closeToggleSO.ApplyModifiedProperties();
+        UnityEventTools.AddPersistentListener(closeButton.onClick, closeToggle.Close);
+
+        panelGO.SetActive(false);
+        return panelGO;
+    }
+
+    private static Text CreateDailySlot(Transform parent, Font font, int day, float xPos, float yPos)
+    {
+        GameObject slotGO = SceneSetup.CreateUIText($"Day{day}Slot", parent, font, $"Day {day}\n+0", 28, TextAnchor.MiddleCenter);
+        RectTransform slotRT = slotGO.GetComponent<RectTransform>();
+        slotRT.anchorMin = new Vector2(0.5f, 0.5f);
+        slotRT.anchorMax = new Vector2(0.5f, 0.5f);
+        slotRT.pivot = new Vector2(0.5f, 0.5f);
+        slotRT.anchoredPosition = new Vector2(xPos, yPos);
+        slotRT.sizeDelta = new Vector2(200f, 140f);
+        return slotGO.GetComponent<Text>();
     }
 
     private static void AddScenesToBuildSettings()
