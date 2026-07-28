@@ -25,6 +25,8 @@ public static class ParticleFX
         go.transform.position = position;
 
         ParticleSystem ps = go.AddComponent<ParticleSystem>();
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
         ParticleSystem.MainModule main = ps.main;
         main.duration = lifetime;
         main.loop = false;

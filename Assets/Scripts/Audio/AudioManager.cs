@@ -18,6 +18,7 @@ public class AudioManager : MonoBehaviour
     private AudioClip gameOverClip;
     private AudioClip victoryClip;
     private AudioClip chestClip;
+    private AudioClip mergeClip;
     private AudioClip musicClip;
 
     private void Awake()
@@ -49,6 +50,7 @@ public class AudioManager : MonoBehaviour
         gameOverClip = RetroAudioSynth.GenerateSweep("GameOver", 400f, 60f, 0.8f, 0.3f);
         victoryClip = RetroAudioSynth.GenerateSweep("Victory", 400f, 1200f, 0.6f, 0.3f);
         chestClip = RetroAudioSynth.GenerateSweep("Chest", 600f, 1400f, 0.3f, 0.25f);
+        mergeClip = RetroAudioSynth.GenerateSweep("Merge", 500f, 1000f, 0.25f, 0.3f);
         musicClip = GenerateMusicLoop();
     }
 
@@ -83,4 +85,5 @@ public class AudioManager : MonoBehaviour
     public void PlayGameOver() => sfxSource.PlayOneShot(gameOverClip);
     public void PlayVictory() => sfxSource.PlayOneShot(victoryClip);
     public void PlayChest() => sfxSource.PlayOneShot(chestClip);
+    public void PlayMerge() => sfxSource.PlayOneShot(mergeClip);
 }

@@ -13,11 +13,11 @@ public class Weapon : MonoBehaviour, IWeapon
     public float Damage { get => damage; set => damage = value; }
     public int ShotCount => 1 + extraShots;
 
-    private void Awake()
+    public void Configure(ShooterManager.ShooterType type, int tier)
     {
-        ShooterManager.ShooterType selected = ShooterManager.Selected;
-        damage = ShooterManager.GetDamage(selected) + UpgradeManager.GetDamageBonus();
-        projectileSpeed = ShooterManager.GetProjectileSpeed(selected);
+        float tierMultiplier = ShooterManager.GetTierDamageMultiplier(tier);
+        damage = ShooterManager.GetDamage(type) * tierMultiplier + UpgradeManager.GetDamageBonus();
+        projectileSpeed = ShooterManager.GetProjectileSpeed(type);
     }
 
     public void AddExtraShots(int amount) => extraShots += amount;

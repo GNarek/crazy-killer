@@ -39,6 +39,8 @@ public static class SceneSetup
     private const string WallHealPickupPath = PrefabsFolder + "/PickupWallHeal.prefab";
     private const string PiercingPickupPath = PrefabsFolder + "/PickupPiercing.prefab";
     private const string ShieldPickupPath = PrefabsFolder + "/PickupShield.prefab";
+    private const string ShooterUnitPrefabPath = PrefabsFolder + "/ShooterUnit.prefab";
+    private const string ShooterCratePickupPath = PrefabsFolder + "/PickupShooterCrate.prefab";
 
     private const float LaneMinX = -3f;
     private const float LaneMaxX = 3f;
@@ -79,17 +81,18 @@ public static class SceneSetup
         Transform enemySpawnPoint = CreateSpawnPoint("EnemySpawnPoint", 26f);
         Transform pickupSpawnPoint = CreateSpawnPoint("PickupSpawnPoint", 18f);
 
-        CreateShooter(projectilePrefab);
+        GameObject shooterUnitPrefab = CreateShooterUnitPrefab(projectilePrefab);
+        CreateSquadManager(shooterUnitPrefab);
+        CreateSquadCollector();
         CreateWaveSpawner(enemyDefinition, enemySpawnPoint);
         CreateDefenseWall();
         CreateGround();
         PositionCamera();
 
-        ConfigureLaneMovement(pickupSpawnPoint);
+        ConfigureLaneMovement();
         EnsureProjectileCollisionSetup(enemiesLayer);
         EnsureEnemyProjectilePrefab();
         EnhanceEnemyPrefab();
-        ApplyShooterVisuals();
         ApplyWallVisuals();
 
         List<EnemyDefinition> enemyDefinitions = new List<EnemyDefinition> { enemyDefinition };
@@ -371,35 +374,93 @@ public static class SceneSetup
         return spawnPoint.transform;
     }
 
-    private static void CreateShooter(GameObject projectilePrefab)
+    private static GameObject CreateShooterUnitPrefab(GameObject projectilePrefab)
     {
-        if (GameObject.Find("Shooter") != null) return;
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(ShooterUnitPrefabPath) == null)
+        {
+            EnsureFolder(PrefabsFolder);
 
-        GameObject shooter = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        shooter.name = "Shooter";
-        shooter.transform.position = new Vector3(0f, 0.5f, -2f);
+            GameObject unit = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            unit.name = "ShooterUnit";
+            unit.AddComponent<ShooterUnit>();
 
-        ShooterController shooterController = shooter.AddComponent<ShooterController>();
-        Weapon weapon = shooter.GetComponent<Weapon>();
+            PrefabUtility.SaveAsPrefabAsset(unit, ShooterUnitPrefabPath);
+            Object.DestroyImmediate(unit);
+        }
 
-        SerializedObject weaponSO = new SerializedObject(weapon);
-        weaponSO.FindProperty("projectilePrefab").objectReferenceValue = projectilePrefab;
-        weaponSO.FindProperty("damage").floatValue = 2f;
-        weaponSO.FindProperty("projectileSpeed").floatValue = 12f;
-        weaponSO.ApplyModifiedProperties();
+        GameObject contents = PrefabUtility.LoadPrefabContents(ShooterUnitPrefabPath);
 
-        SerializedObject controllerSO = new SerializedObject(shooterController);
-        controllerSO.FindProperty("baseFireRate").floatValue = 1.5f;
-        controllerSO.ApplyModifiedProperties();
+        if (contents.TryGetComponent(out Weapon weapon))
+        {
+            SerializedObject weaponSO = new SerializedObject(weapon);
+            weaponSO.FindProperty("projectilePrefab").objectReferenceValue = projectilePrefab;
+            weaponSO.ApplyModifiedProperties();
+        }
+
+        if (contents.TryGetComponent(out Renderer renderer))
+        {
+            renderer.sharedMaterial = GetOrCreateMaterial("ShooterUnit", new Color(0.2f, 0.5f, 1f));
+        }
+
+        PrefabUtility.SaveAsPrefabAsset(contents, ShooterUnitPrefabPath);
+        PrefabUtility.UnloadPrefabContents(contents);
+
+        return AssetDatabase.LoadAssetAtPath<GameObject>(ShooterUnitPrefabPath);
     }
 
-    private static void ApplyShooterVisuals()
+    private static void CreateSquadManager(GameObject unitPrefab)
     {
-        GameObject shooterGO = GameObject.Find("Shooter");
-        if (shooterGO != null && shooterGO.TryGetComponent(out Renderer renderer))
+        GameObject squadGO = GameObject.Find("SquadManager");
+        if (squadGO == null) squadGO = new GameObject("SquadManager");
+
+        SquadManager manager = squadGO.GetComponent<SquadManager>();
+        if (manager == null) manager = squadGO.AddComponent<SquadManager>();
+
+        SerializedObject managerSO = new SerializedObject(manager);
+        managerSO.FindProperty("unitPrefab").objectReferenceValue = unitPrefab;
+        managerSO.FindProperty("unitY").floatValue = 0.5f;
+        managerSO.FindProperty("unitZ").floatValue = -2f;
+
+        SerializedProperty slotsProp = managerSO.FindProperty("slotPositions");
+        float[] positions = { -2.4f, -1.2f, 0f, 1.2f, 2.4f };
+        slotsProp.arraySize = positions.Length;
+        for (int i = 0; i < positions.Length; i++)
         {
-            renderer.sharedMaterial = GetOrCreateMaterial("Shooter", new Color(0.2f, 0.5f, 1f));
+            slotsProp.GetArrayElementAtIndex(i).floatValue = positions[i];
         }
+
+        managerSO.ApplyModifiedProperties();
+
+        if (squadGO.GetComponent<ShooterDragMerge>() == null)
+        {
+            ShooterDragMerge dragMerge = squadGO.AddComponent<ShooterDragMerge>();
+            SerializedObject dragSO = new SerializedObject(dragMerge);
+            dragSO.FindProperty("minX").floatValue = LaneMinX;
+            dragSO.FindProperty("maxX").floatValue = LaneMaxX;
+            dragSO.FindProperty("unitY").floatValue = 0.5f;
+            dragSO.ApplyModifiedProperties();
+        }
+    }
+
+    private static void CreateSquadCollector()
+    {
+        GameObject collectorGO = GameObject.Find("SquadCollector");
+        if (collectorGO == null) collectorGO = new GameObject("SquadCollector");
+
+        collectorGO.transform.position = new Vector3(0f, 0.5f, -2f);
+
+        BoxCollider collider = collectorGO.GetComponent<BoxCollider>();
+        if (collider == null) collider = collectorGO.AddComponent<BoxCollider>();
+        collider.isTrigger = true;
+        collider.size = new Vector3(LaneMaxX - LaneMinX + 1f, 1.5f, 1.5f);
+
+        Rigidbody rb = collectorGO.GetComponent<Rigidbody>();
+        if (rb == null) rb = collectorGO.AddComponent<Rigidbody>();
+        rb.isKinematic = true;
+        rb.useGravity = false;
+
+        if (collectorGO.GetComponent<BuffReceiver>() == null) collectorGO.AddComponent<BuffReceiver>();
+        if (collectorGO.GetComponent<BuffPopupSpawner>() == null) collectorGO.AddComponent<BuffPopupSpawner>();
     }
 
     private static void CreateWaveSpawner(EnemyDefinition definition, Transform spawnPoint)
@@ -476,24 +537,8 @@ public static class SceneSetup
         }
     }
 
-    private static void ConfigureLaneMovement(Transform pickupSpawnPoint)
+    private static void ConfigureLaneMovement()
     {
-        GameObject shooterGO = GameObject.Find("Shooter");
-        if (shooterGO != null)
-        {
-            ShooterMovement movement = shooterGO.GetComponent<ShooterMovement>();
-            if (movement == null) movement = shooterGO.AddComponent<ShooterMovement>();
-
-            SerializedObject movementSO = new SerializedObject(movement);
-            movementSO.FindProperty("minX").floatValue = LaneMinX;
-            movementSO.FindProperty("maxX").floatValue = LaneMaxX;
-            movementSO.ApplyModifiedProperties();
-
-            if (shooterGO.GetComponent<BuffReceiver>() == null) shooterGO.AddComponent<BuffReceiver>();
-            if (shooterGO.GetComponent<BuffPopupSpawner>() == null) shooterGO.AddComponent<BuffPopupSpawner>();
-            if (shooterGO.GetComponent<ShooterVisuals>() == null) shooterGO.AddComponent<ShooterVisuals>();
-        }
-
         GameObject waveSpawnerGO = GameObject.Find("WaveSpawner");
         if (waveSpawnerGO != null && waveSpawnerGO.TryGetComponent(out WaveSpawner spawner))
         {
@@ -562,7 +607,9 @@ public static class SceneSetup
         // MultiShot pickup temporarily disabled from spawning; prefab/definition still built, just excluded from the pool below.
         CreatePickupPrefab(MultiShotPickupPath, "PickupMultiShot", multiShotBuff, new Color(0.1f, 0.85f, 0.85f));
 
-        return new List<GameObject> { fireRatePickup, damagePickup, wallHealPickup, piercingPickup, shieldPickup };
+        GameObject shooterCratePickup = CreateShooterCratePickup();
+
+        return new List<GameObject> { fireRatePickup, damagePickup, wallHealPickup, piercingPickup, shieldPickup, shooterCratePickup };
     }
 
     private static BuffDefinition CreateBuffDefinition(string path, string id, BuffType type, float value, float duration)
@@ -620,6 +667,43 @@ public static class SceneSetup
 
         GameObject prefab = PrefabUtility.SaveAsPrefabAsset(pickup, path);
         Object.DestroyImmediate(pickup);
+        return prefab;
+    }
+
+    private static GameObject CreateShooterCratePickup()
+    {
+        GameObject existing = AssetDatabase.LoadAssetAtPath<GameObject>(ShooterCratePickupPath);
+        if (existing != null) return existing;
+
+        EnsureFolder(PrefabsFolder);
+
+        GameObject crate = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        crate.name = "PickupShooterCrate";
+        crate.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+
+        Object.DestroyImmediate(crate.GetComponent<Collider>());
+        BoxCollider collider = crate.AddComponent<BoxCollider>();
+        collider.isTrigger = true;
+
+        Rigidbody rb = crate.AddComponent<Rigidbody>();
+        rb.isKinematic = true;
+        rb.useGravity = false;
+
+        LaneMover mover = crate.AddComponent<LaneMover>();
+        mover.direction = new Vector3(0f, 0f, -1f);
+        mover.speed = 2.5f;
+
+        crate.AddComponent<AutoDespawn>();
+        crate.AddComponent<Bobber>();
+        crate.AddComponent<ShooterCratePickup>();
+
+        if (crate.TryGetComponent(out Renderer renderer))
+        {
+            renderer.sharedMaterial = GetOrCreateMaterial("PickupShooterCrate", new Color(1f, 0.75f, 0.1f));
+        }
+
+        GameObject prefab = PrefabUtility.SaveAsPrefabAsset(crate, ShooterCratePickupPath);
+        Object.DestroyImmediate(crate);
         return prefab;
     }
 
@@ -1054,7 +1138,7 @@ public static class SceneSetup
         GameObject shooterGO = GameObject.Find("Shooter");
         if (shooterGO != null)
         {
-            GameObjectUtility.RemoveMonoBehavioursWithMissingScript(shooterGO);
+            Object.DestroyImmediate(shooterGO);
         }
 
         GameObject oldWallBar = GameObject.Find("WallHealthBarBg");

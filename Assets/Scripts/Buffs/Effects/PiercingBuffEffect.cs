@@ -11,13 +11,11 @@ public class PiercingBuffEffect : IBuffEffect
 
     public void Apply(GameObject target)
     {
-        if (target.TryGetComponent(out Weapon weapon))
-            weapon.AddPierce(amount);
+        SquadManager.Instance?.AddPierceBonus(amount);
     }
 
     public void Remove(GameObject target)
     {
-        if (target.TryGetComponent(out Weapon weapon))
-            weapon.RemovePierce(amount);
+        SquadManager.Instance?.RemovePierceBonus(amount);
     }
 }

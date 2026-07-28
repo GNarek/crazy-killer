@@ -4,6 +4,8 @@ public static class ShooterManager
 {
     public enum ShooterType { Standard, Rapid, Heavy }
 
+    public const int MaxTier = 3;
+
     private const string SelectedKey = "SelectedShooter";
 
     public static ShooterType Selected
@@ -98,6 +100,26 @@ public static class ShooterManager
             ShooterType.Rapid => new Vector3(0.6f, 0.6f, 0.6f),
             ShooterType.Heavy => new Vector3(1.7f, 1.7f, 1.7f),
             _ => Vector3.one
+        };
+    }
+
+    public static float GetTierDamageMultiplier(int tier)
+    {
+        return tier switch
+        {
+            2 => 2f,
+            3 => 4f,
+            _ => 1f
+        };
+    }
+
+    public static float GetTierScaleMultiplier(int tier)
+    {
+        return tier switch
+        {
+            2 => 1.3f,
+            3 => 1.6f,
+            _ => 1f
         };
     }
 

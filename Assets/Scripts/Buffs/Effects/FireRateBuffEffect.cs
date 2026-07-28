@@ -11,13 +11,11 @@ public class FireRateBuffEffect : IBuffEffect
 
     public void Apply(GameObject target)
     {
-        if (target.TryGetComponent(out ShooterController shooter))
-            shooter.AddFireRateBonus(amount);
+        SquadManager.Instance?.AddFireRateBonus(amount);
     }
 
     public void Remove(GameObject target)
     {
-        if (target.TryGetComponent(out ShooterController shooter))
-            shooter.RemoveFireRateBonus(amount);
+        SquadManager.Instance?.RemoveFireRateBonus(amount);
     }
 }

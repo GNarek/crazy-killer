@@ -11,13 +11,11 @@ public class DamageBuffEffect : IBuffEffect
 
     public void Apply(GameObject target)
     {
-        if (target.TryGetComponent(out Weapon weapon))
-            weapon.Damage += amount;
+        SquadManager.Instance?.AddDamageBonus(amount);
     }
 
     public void Remove(GameObject target)
     {
-        if (target.TryGetComponent(out Weapon weapon))
-            weapon.Damage -= amount;
+        SquadManager.Instance?.RemoveDamageBonus(amount);
     }
 }
