@@ -3,8 +3,6 @@ using UnityEngine;
 [RequireComponent(typeof(BuffReceiver))]
 public class BuffPopupSpawner : MonoBehaviour
 {
-    [SerializeField] private Vector3 offset = new Vector3(0f, 1.5f, 0f);
-
     private BuffReceiver receiver;
 
     private void Awake()
@@ -20,7 +18,7 @@ public class BuffPopupSpawner : MonoBehaviour
 
     private void HandleBuffApplied(BuffDefinition buff)
     {
-        FloatingText.Spawn(BuffLabel(buff.type), transform.position + offset, BuffColor(buff.type));
+        HUDController.Instance?.ShowBuffPopup(BuffLabel(buff.type), BuffColor(buff.type));
     }
 
     private static string BuffLabel(BuffType type)

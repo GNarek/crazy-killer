@@ -14,7 +14,7 @@ public class ShooterController : MonoBehaviour
     private void Awake()
     {
         weapon = GetComponent<Weapon>();
-        baseFireRate += UpgradeManager.GetFireRateBonus();
+        baseFireRate = ShooterManager.GetFireRate(ShooterManager.Selected) + UpgradeManager.GetFireRateBonus();
     }
 
     private void Update()

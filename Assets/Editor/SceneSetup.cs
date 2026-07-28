@@ -442,6 +442,14 @@ public static class SceneSetup
         }
 
         if (wallGO.GetComponent<HitFlash>() == null) wallGO.AddComponent<HitFlash>();
+
+        WallHealthBarWorld healthBar = wallGO.GetComponent<WallHealthBarWorld>();
+        if (healthBar == null) healthBar = wallGO.AddComponent<WallHealthBarWorld>();
+
+        SerializedObject healthBarSO = new SerializedObject(healthBar);
+        healthBarSO.FindProperty("worldOffset").vector3Value = new Vector3(0f, 1f, -1f);
+        healthBarSO.FindProperty("barSize").vector2Value = new Vector2(850f, 55f);
+        healthBarSO.ApplyModifiedProperties();
     }
 
     private static void CreateGround()
@@ -477,6 +485,7 @@ public static class SceneSetup
 
             if (shooterGO.GetComponent<BuffReceiver>() == null) shooterGO.AddComponent<BuffReceiver>();
             if (shooterGO.GetComponent<BuffPopupSpawner>() == null) shooterGO.AddComponent<BuffPopupSpawner>();
+            if (shooterGO.GetComponent<ShooterVisuals>() == null) shooterGO.AddComponent<ShooterVisuals>();
         }
 
         GameObject waveSpawnerGO = GameObject.Find("WaveSpawner");
@@ -665,29 +674,6 @@ public static class SceneSetup
         scoreRT.anchoredPosition = new Vector2(40f, -40f);
         scoreRT.sizeDelta = new Vector2(400f, 80f);
 
-        GameObject barBgGO = new GameObject("WallHealthBarBg", typeof(RectTransform), typeof(Image));
-        barBgGO.transform.SetParent(canvasGO.transform, false);
-        barBgGO.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.5f);
-        RectTransform barBgRT = barBgGO.GetComponent<RectTransform>();
-        barBgRT.anchorMin = new Vector2(0.5f, 1f);
-        barBgRT.anchorMax = new Vector2(0.5f, 1f);
-        barBgRT.pivot = new Vector2(0.5f, 1f);
-        barBgRT.anchoredPosition = new Vector2(0f, -40f);
-        barBgRT.sizeDelta = new Vector2(600f, 50f);
-
-        GameObject barFillGO = new GameObject("WallHealthBarFill", typeof(RectTransform), typeof(Image));
-        barFillGO.transform.SetParent(barBgGO.transform, false);
-        Image barFill = barFillGO.GetComponent<Image>();
-        barFill.color = new Color(0.85f, 0.2f, 0.2f, 1f);
-        barFill.type = Image.Type.Filled;
-        barFill.fillMethod = Image.FillMethod.Horizontal;
-        barFill.fillAmount = 1f;
-        RectTransform barFillRT = barFillGO.GetComponent<RectTransform>();
-        barFillRT.anchorMin = Vector2.zero;
-        barFillRT.anchorMax = Vector2.one;
-        barFillRT.offsetMin = Vector2.zero;
-        barFillRT.offsetMax = Vector2.zero;
-
         GameObject panelGO = new GameObject("GameOverPanel", typeof(RectTransform), typeof(Image));
         panelGO.transform.SetParent(canvasGO.transform, false);
         panelGO.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.75f);
@@ -739,7 +725,6 @@ public static class SceneSetup
         HUDController hud = canvasGO.AddComponent<HUDController>();
         SerializedObject hudSO = new SerializedObject(hud);
         hudSO.FindProperty("scoreText").objectReferenceValue = scoreGO.GetComponent<Text>();
-        hudSO.FindProperty("wallHealthFill").objectReferenceValue = barFill;
         hudSO.FindProperty("gameOverPanel").objectReferenceValue = panelGO;
         hudSO.FindProperty("coinsEarnedText").objectReferenceValue = coinsEarnedGO.GetComponent<Text>();
         hudSO.ApplyModifiedProperties();
@@ -798,6 +783,45 @@ public static class SceneSetup
             {
                 SerializedObject hudSO = new SerializedObject(hudForWave);
                 hudSO.FindProperty("waveText").objectReferenceValue = waveGO.GetComponent<Text>();
+                hudSO.ApplyModifiedProperties();
+            }
+        }
+
+        if (canvasGO.transform.Find("BuffPopupText") == null)
+        {
+            GameObject buffPopupGO = CreateUIText("BuffPopupText", canvasGO.transform, defaultFont, "+BUFF", 32, TextAnchor.UpperLeft);
+            RectTransform buffPopupRT = buffPopupGO.GetComponent<RectTransform>();
+            buffPopupRT.anchorMin = new Vector2(0f, 1f);
+            buffPopupRT.anchorMax = new Vector2(0f, 1f);
+            buffPopupRT.pivot = new Vector2(0f, 1f);
+            buffPopupRT.anchoredPosition = new Vector2(40f, -200f);
+            buffPopupRT.sizeDelta = new Vector2(500f, 55f);
+            buffPopupGO.SetActive(false);
+
+            if (canvasGO.TryGetComponent(out HUDController hudForBuffPopup))
+            {
+                SerializedObject hudSO = new SerializedObject(hudForBuffPopup);
+                hudSO.FindProperty("buffPopupText").objectReferenceValue = buffPopupGO.GetComponent<Text>();
+                hudSO.ApplyModifiedProperties();
+            }
+        }
+
+        if (canvasGO.transform.Find("ChestBannerText") == null)
+        {
+            GameObject chestBannerGO = CreateUIText("ChestBannerText", canvasGO.transform, defaultFont, "CHEST! +0 COINS", 64, TextAnchor.MiddleCenter);
+            RectTransform chestBannerRT = chestBannerGO.GetComponent<RectTransform>();
+            chestBannerRT.anchorMin = new Vector2(0.5f, 0.5f);
+            chestBannerRT.anchorMax = new Vector2(0.5f, 0.5f);
+            chestBannerRT.pivot = new Vector2(0.5f, 0.5f);
+            chestBannerRT.anchoredPosition = new Vector2(0f, 300f);
+            chestBannerRT.sizeDelta = new Vector2(900f, 150f);
+            chestBannerGO.GetComponent<Text>().color = new Color(1f, 0.85f, 0.2f);
+            chestBannerGO.SetActive(false);
+
+            if (canvasGO.TryGetComponent(out HUDController hudForChest))
+            {
+                SerializedObject hudSO = new SerializedObject(hudForChest);
+                hudSO.FindProperty("chestBannerText").objectReferenceValue = chestBannerGO.GetComponent<Text>();
                 hudSO.ApplyModifiedProperties();
             }
         }
@@ -1018,6 +1042,12 @@ public static class SceneSetup
         if (shooterGO != null)
         {
             GameObjectUtility.RemoveMonoBehavioursWithMissingScript(shooterGO);
+        }
+
+        GameObject oldWallBar = GameObject.Find("WallHealthBarBg");
+        if (oldWallBar != null && oldWallBar.transform.parent != null && oldWallBar.transform.parent.name == "HUD")
+        {
+            Object.DestroyImmediate(oldWallBar);
         }
     }
 

@@ -20,9 +20,11 @@ public class WaveSpawner : MonoBehaviour
     [SerializeField] private float waveDuration = 15f;
     [SerializeField] private float bossWaveDuration = 30f;
     [SerializeField] private float intermissionDuration = 4f;
+    [SerializeField] private int chestEveryNWaves = 3;
 
     public event Action<int, int> WaveChanged;
     public event Action Victory;
+    public event Action<int> ChestOpened;
 
     private float timer;
     private float waveTimer;
@@ -115,6 +117,13 @@ public class WaveSpawner : MonoBehaviour
     {
         inIntermission = true;
         waveTimer = intermissionDuration;
+
+        if (currentWave % chestEveryNWaves == 0)
+        {
+            int bonus = 10 + currentWave * 2;
+            GameManager.Instance?.AddScore(bonus);
+            ChestOpened?.Invoke(bonus);
+        }
     }
 
     private float WaveProgress()

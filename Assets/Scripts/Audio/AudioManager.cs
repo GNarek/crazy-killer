@@ -17,6 +17,7 @@ public class AudioManager : MonoBehaviour
     private AudioClip wallHitClip;
     private AudioClip gameOverClip;
     private AudioClip victoryClip;
+    private AudioClip chestClip;
     private AudioClip musicClip;
 
     private void Awake()
@@ -47,6 +48,7 @@ public class AudioManager : MonoBehaviour
         wallHitClip = RetroAudioSynth.GenerateNoiseBurst("WallHit", 0.15f, 0.3f);
         gameOverClip = RetroAudioSynth.GenerateSweep("GameOver", 400f, 60f, 0.8f, 0.3f);
         victoryClip = RetroAudioSynth.GenerateSweep("Victory", 400f, 1200f, 0.6f, 0.3f);
+        chestClip = RetroAudioSynth.GenerateSweep("Chest", 600f, 1400f, 0.3f, 0.25f);
         musicClip = GenerateMusicLoop();
     }
 
@@ -80,4 +82,5 @@ public class AudioManager : MonoBehaviour
     public void PlayWallHit() => sfxSource.PlayOneShot(wallHitClip);
     public void PlayGameOver() => sfxSource.PlayOneShot(gameOverClip);
     public void PlayVictory() => sfxSource.PlayOneShot(victoryClip);
+    public void PlayChest() => sfxSource.PlayOneShot(chestClip);
 }

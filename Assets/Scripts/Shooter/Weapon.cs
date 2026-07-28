@@ -14,7 +14,9 @@ public class Weapon : MonoBehaviour, IWeapon
 
     private void Awake()
     {
-        damage += UpgradeManager.GetDamageBonus();
+        ShooterManager.ShooterType selected = ShooterManager.Selected;
+        damage = ShooterManager.GetDamage(selected) + UpgradeManager.GetDamageBonus();
+        projectileSpeed = ShooterManager.GetProjectileSpeed(selected);
     }
 
     public void AddExtraShots(int amount) => extraShots += amount;

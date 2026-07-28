@@ -95,6 +95,112 @@ public static class MainMenuSetup
 
             UnityEventTools.AddPersistentListener(upgradesButton.onClick, panelToggle.Open);
         }
+
+        if (canvasGO.transform.Find("ShootersButton") == null)
+        {
+            Button shootersButton = SceneSetup.CreateButton("ShootersButton", canvasGO.transform, defaultFont, "SHOOTERS",
+                new Color(0.5f, 0.2f, 0.7f, 1f), new Vector2(0f, -350f), new Vector2(400f, 110f));
+
+            GameObject shooterPanel = CreateShooterPanel(canvasGO.transform, defaultFont);
+
+            GameObject shooterToggleGO = new GameObject("ShooterPanelToggle", typeof(RectTransform));
+            shooterToggleGO.transform.SetParent(canvasGO.transform, false);
+            PanelToggle shooterPanelToggle = shooterToggleGO.AddComponent<PanelToggle>();
+            SerializedObject shooterToggleSO = new SerializedObject(shooterPanelToggle);
+            shooterToggleSO.FindProperty("panel").objectReferenceValue = shooterPanel;
+            shooterToggleSO.ApplyModifiedProperties();
+
+            UnityEventTools.AddPersistentListener(shootersButton.onClick, shooterPanelToggle.Open);
+        }
+    }
+
+    private static GameObject CreateShooterPanel(Transform parent, Font font)
+    {
+        GameObject panelGO = new GameObject("ShooterPanel", typeof(RectTransform), typeof(Image));
+        panelGO.transform.SetParent(parent, false);
+        panelGO.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.85f);
+        RectTransform panelRT = panelGO.GetComponent<RectTransform>();
+        panelRT.anchorMin = Vector2.zero;
+        panelRT.anchorMax = Vector2.one;
+        panelRT.offsetMin = Vector2.zero;
+        panelRT.offsetMax = Vector2.zero;
+
+        GameObject titleGO = SceneSetup.CreateUIText("Title", panelGO.transform, font, "SHOOTERS", 72, TextAnchor.MiddleCenter);
+        RectTransform titleRT = titleGO.GetComponent<RectTransform>();
+        titleRT.anchorMin = new Vector2(0.5f, 0.5f);
+        titleRT.anchorMax = new Vector2(0.5f, 0.5f);
+        titleRT.pivot = new Vector2(0.5f, 0.5f);
+        titleRT.anchoredPosition = new Vector2(0f, 650f);
+        titleRT.sizeDelta = new Vector2(800f, 150f);
+
+        GameObject coinsGO = SceneSetup.CreateUIText("CoinsText", panelGO.transform, font, "Coins: 0", 48, TextAnchor.MiddleCenter);
+        RectTransform coinsRT = coinsGO.GetComponent<RectTransform>();
+        coinsRT.anchorMin = new Vector2(0.5f, 0.5f);
+        coinsRT.anchorMax = new Vector2(0.5f, 0.5f);
+        coinsRT.pivot = new Vector2(0.5f, 0.5f);
+        coinsRT.anchoredPosition = new Vector2(0f, 520f);
+        coinsRT.sizeDelta = new Vector2(600f, 80f);
+        coinsGO.GetComponent<Text>().color = new Color(1f, 0.85f, 0.2f);
+
+        CreateShooterRow(panelGO.transform, font, "STANDARD", 260f, out Text standardStatus, out Button standardAction, out Text standardLabel);
+        CreateShooterRow(panelGO.transform, font, "RAPID", 80f, out Text rapidStatus, out Button rapidAction, out Text rapidLabel);
+        CreateShooterRow(panelGO.transform, font, "HEAVY", -100f, out Text heavyStatus, out Button heavyAction, out Text heavyLabel);
+
+        Button closeButton = SceneSetup.CreateButton("CloseButton", panelGO.transform, font, "CLOSE",
+            new Color(0.5f, 0.5f, 0.5f, 1f), new Vector2(0f, -300f), new Vector2(400f, 110f));
+
+        ShooterSelectController select = panelGO.AddComponent<ShooterSelectController>();
+        SerializedObject selectSO = new SerializedObject(select);
+        selectSO.FindProperty("coinsText").objectReferenceValue = coinsGO.GetComponent<Text>();
+        selectSO.FindProperty("standardStatusText").objectReferenceValue = standardStatus;
+        selectSO.FindProperty("standardActionButton").objectReferenceValue = standardAction;
+        selectSO.FindProperty("standardActionLabel").objectReferenceValue = standardLabel;
+        selectSO.FindProperty("rapidStatusText").objectReferenceValue = rapidStatus;
+        selectSO.FindProperty("rapidActionButton").objectReferenceValue = rapidAction;
+        selectSO.FindProperty("rapidActionLabel").objectReferenceValue = rapidLabel;
+        selectSO.FindProperty("heavyStatusText").objectReferenceValue = heavyStatus;
+        selectSO.FindProperty("heavyActionButton").objectReferenceValue = heavyAction;
+        selectSO.FindProperty("heavyActionLabel").objectReferenceValue = heavyLabel;
+        selectSO.ApplyModifiedProperties();
+
+        UnityEventTools.AddPersistentListener(standardAction.onClick, select.ActionStandard);
+        UnityEventTools.AddPersistentListener(rapidAction.onClick, select.ActionRapid);
+        UnityEventTools.AddPersistentListener(heavyAction.onClick, select.ActionHeavy);
+
+        PanelToggle closeToggle = panelGO.AddComponent<PanelToggle>();
+        SerializedObject closeToggleSO = new SerializedObject(closeToggle);
+        closeToggleSO.FindProperty("panel").objectReferenceValue = panelGO;
+        closeToggleSO.ApplyModifiedProperties();
+        UnityEventTools.AddPersistentListener(closeButton.onClick, closeToggle.Close);
+
+        panelGO.SetActive(false);
+        return panelGO;
+    }
+
+    private static void CreateShooterRow(Transform parent, Font font, string label, float yPos,
+        out Text statusText, out Button actionButton, out Text actionLabel)
+    {
+        GameObject labelGO = SceneSetup.CreateUIText(label + "Label", parent, font, label, 34, TextAnchor.MiddleLeft);
+        RectTransform labelRT = labelGO.GetComponent<RectTransform>();
+        labelRT.anchorMin = new Vector2(0.5f, 0.5f);
+        labelRT.anchorMax = new Vector2(0.5f, 0.5f);
+        labelRT.pivot = new Vector2(0.5f, 0.5f);
+        labelRT.anchoredPosition = new Vector2(-330f, yPos);
+        labelRT.sizeDelta = new Vector2(280f, 100f);
+
+        GameObject statusGO = SceneSetup.CreateUIText(label + "Status", parent, font, "", 26, TextAnchor.MiddleCenter);
+        RectTransform statusRT = statusGO.GetComponent<RectTransform>();
+        statusRT.anchorMin = new Vector2(0.5f, 0.5f);
+        statusRT.anchorMax = new Vector2(0.5f, 0.5f);
+        statusRT.pivot = new Vector2(0.5f, 0.5f);
+        statusRT.anchoredPosition = new Vector2(-60f, yPos);
+        statusRT.sizeDelta = new Vector2(180f, 100f);
+        statusText = statusGO.GetComponent<Text>();
+
+        Button button = SceneSetup.CreateButton(label + "ActionButton", parent, font, "",
+            new Color(0.2f, 0.6f, 0.9f, 1f), new Vector2(220f, yPos), new Vector2(260f, 100f));
+        actionButton = button;
+        actionLabel = button.GetComponentInChildren<Text>();
     }
 
     private static GameObject CreateUpgradePanel(Transform parent, Font font)
